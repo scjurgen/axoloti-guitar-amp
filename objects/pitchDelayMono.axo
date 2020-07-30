@@ -1,0 +1,104 @@
+<objdefs appVersion="2.0.0">
+   <obj.normal id="pitchDelayMono" uuid="9d1f4b0e-ca5e-407d-88d0-44fa47199ffd">
+      <license>GPL</license>
+      <inlets>
+         <frac32buffer name="inLeft"/>
+      </inlets>
+      <outlets>
+         <frac32buffer name="outLeft"/>
+      </outlets>
+      <displays/>
+      <params>
+         <frac32.u.map.ratio name="feedback">
+            <DefaultValue v="0.2"/>
+         </frac32.u.map.ratio>
+         <int32 name="fadeSize">
+            <MinValue i="3"/>
+            <MaxValue i="16"/>
+         </int32>
+         <frac32.s.map name="pitchRatio">
+            <DefaultValue v="0.0"/>
+         </frac32.s.map>
+         <frac32.u.map.ratio name="dryWet" description="">
+            <DefaultValue v="0.0"/>
+         </frac32.u.map.ratio>
+      </params>
+      <attribs>
+         <combo name="width">
+            <MenuEntries>
+               <string>1024</string>
+               <string>2048</string>
+               <string>4096</string>
+               <string>8192</string>
+               <string>16384</string>
+               <string>24000</string>
+               <string>48000</string>
+               <string>96000</string>
+               <string>200000</string>
+            </MenuEntries>
+            <CEntries>
+               <string>1024</string>
+               <string>2048</string>
+               <string>4096</string>
+               <string>8192</string>
+               <string>16384</string>
+               <string>24000</string>
+               <string>48000</string>
+               <string>96000</string>
+               <string>200000</string>
+            </CEntries>
+         </combo>
+      </attribs>
+      <file-depends/>
+      <includes/>
+      <depends/>
+      <modules/>
+      <code.declaration><![CDATA[#include "/Users/scjurgen/Desktop/axoloti-amp/PitchDelay.h"
+
+PitchDelay oDelay[1];
+
+
+void init(int size)
+{
+	oDelay[0].init_delay(size);
+
+}]]></code.declaration>
+      <code.init><![CDATA[init(attr_width);]]></code.init>
+      <code.krate><![CDATA[static int krateCount=2990;
+krateCount++;
+if (krateCount==3000)
+{
+	krateCount = 0;
+	oDelay[0].setFadeTime(param_fadeSize);
+	oDelay[1].setFadeTime(param_fadeSize);
+	oDelay[0].setPitch((int32_t)param_pitchRatio);
+	oDelay[1].setPitch((int32_t)param_pitchRatio+(int32_t)10000);
+	oDelay[0].setFeedback(param_feedback);
+	oDelay[1].setFeedback(param_feedback);
+}
+
+if (krateCount % 30==0)
+{
+	int delta = oDelay[1].m_head-(oDelay[1].m_fadeInPos>>SHIFTADVANCE);
+	if (delta < 0)
+		delta+=oDelay[1].m_size;
+	int deltaOut = oDelay[1].m_head-(oDelay[1].m_fadeOutPos>>SHIFTADVANCE);
+	if (deltaOut < 0)
+		deltaOut+=oDelay[1].m_size;
+	//LogTextMessage("dt=%d dtOut=%d fin=%d hd=%d adv=%f", delta, deltaOut, oDelay[1].m_fadeInPos>>SHIFTADVANCE, oDelay[1].m_head, q27_to_float(oDelay[1].m_advance<<11));
+}
+
+outlet_o1 = (0x7ffffff-param_dryWet)<<4;]]></code.krate>
+      <code.srate><![CDATA[int32_t value = oDelay[0].step(inlet_inLeft);
+int32_t a = ___SMMUL(value, param_dryWet<<4)<<1;
+a+=___SMMUL(inlet_inLeft, (0x7ffffff-param_dryWet)<<4)<<1;
+
+outlet_outLeft = a;
+
+value = oDelay[1].step(inlet_inRight);
+a = ___SMMUL(value, param_dryWet<<4)<<1;
+a+=___SMMUL(inlet_inRight, (0x7ffffff-param_dryWet)<<4)<<1;
+
+outlet_outRight = a;]]></code.srate>
+   </obj.normal>
+</objdefs>

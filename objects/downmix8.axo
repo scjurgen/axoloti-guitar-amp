@@ -1,0 +1,37 @@
+<objdefs appVersion="2.0.0">
+   <obj.normal id="downmix8" uuid="79d704c9-9b46-430e-bf14-53d0ebba89d2">
+      <sDescription>7 input downmix</sDescription>
+      <author>Johannes Taelman</author>
+      <license>BSD</license>
+      <inlets>
+         <frac32buffer name="p_in1" description="input 1"/>
+         <frac32buffer name="p_in2" description="input 2"/>
+         <frac32buffer name="n_in3" description="input 3"/>
+         <frac32buffer name="p_in4" description="input 4"/>
+         <frac32buffer name="n_in5" description="input 5"/>
+         <frac32buffer name="n_in6" description="input 6"/>
+         <frac32buffer name="n_in7" description="input 7"/>
+         <frac32buffer name="p_in8" description=""/>
+      </inlets>
+      <outlets>
+         <frac32buffer name="out" description="mix out"/>
+      </outlets>
+      <displays/>
+      <params/>
+      <attribs/>
+      <file-depends/>
+      <includes/>
+      <depends/>
+      <modules/>
+      <code.srate><![CDATA[int32_t a = inlet_p__in1;
+
+a += inlet_p__in2;
+a -= inlet_n__in3;
+a += inlet_p__in4;
+a -= inlet_n__in5;
+a -= inlet_n__in6;
+a -= inlet_n__in7;
+a += inlet_p__in8;
+outlet_out = a;]]></code.srate>
+   </obj.normal>
+</objdefs>

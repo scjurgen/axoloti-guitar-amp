@@ -1,0 +1,21 @@
+<objdefs appVersion="2.0.0">
+   <obj.normal id="MidiMixChannel" uuid="8c5d5753-3695-4300-998b-1dc760bdb92c">
+      <license>GPL</license>
+      <inlets/>
+      <outlets>
+         <frac32.bipolar name="pot1" description=""/>
+         <frac32.bipolar name="pot2" description=""/>
+         <frac32.bipolar name="pot3" description=""/>
+         <frac32.bipolar name="slide" description=""/>
+      </outlets>
+      <displays/>
+      <params/>
+      <attribs>
+         <spinner name="channel" description="" MinValue="1" MaxValue="8" DefaultValue="1"/>
+      </attribs>
+      <file-depends/>
+      <includes/>
+      <depends/>
+      <modules/>
+   </obj.normal>
+</objdefs>

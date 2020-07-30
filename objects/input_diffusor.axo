@@ -1,0 +1,176 @@
+<objdefs appVersion="2.0.0">
+   <obj.normal id="input_diffusor" uuid="5ea726f7-2322-4b70-b506-fb82d404d6f9">
+      <sDescription>samplesize variant 4 chain combfilter with prestage fixed damper (0.9995)
+Jon Dattorro, Effect Desgin, J.Audio Eng.Soc, Vol.45, No. 9, 1997 September
+Modified by adding damping on all filters.</sDescription>
+      <author>Jürgen Schwietering</author>
+      <license>BSD</license>
+      <helpPatch>fdbkcomb.axh</helpPatch>
+      <inlets>
+         <frac32buffer name="in" description="in"/>
+      </inlets>
+      <outlets>
+         <frac32buffer name="out" description="out"/>
+      </outlets>
+      <displays/>
+      <params>
+         <frac32.s.map.ratio name="fdbk12">
+            <DefaultValue v="48.0"/>
+         </frac32.s.map.ratio>
+         <frac32.s.map.ratio name="fdbk34">
+            <DefaultValue v="40.0"/>
+         </frac32.s.map.ratio>
+         <frac32.u.map name="damping" description="">
+            <DefaultValue v="0.0"/>
+         </frac32.u.map>
+      </params>
+      <attribs>
+         <spinner name="chainSize1" MinValue="100" MaxValue="500" DefaultValue="227"/>
+         <spinner name="chainSize2" MinValue="100" MaxValue="300" DefaultValue="171"/>
+         <spinner name="chainSize3" MinValue="100" MaxValue="700" DefaultValue="606"/>
+         <spinner name="chainSize4" MinValue="100" MaxValue="500" DefaultValue="443"/>
+      </attribs>
+      <file-depends/>
+      <includes/>
+      <depends/>
+      <modules/>
+      <code.declaration><![CDATA[class FeedbackRing
+{
+
+public:
+	FeedbackRing()
+	: m_size(0)
+	, m_head(0)
+	, m_gain(0)
+	, m_buffer(0)
+	, m_adjustGain(false)
+	{
+		
+	}
+
+	void reset()
+	{
+		memset(m_buffer,0, sizeof(int32_t)*m_size);
+		m_head = 0;
+		m_adjustGain = false;	
+	}
+
+	void initSram(int size, int32_t *buffer)
+	{
+		m_buffer = buffer;
+		m_size = size;
+		reset();
+	}
+
+	void init(int size)
+	{
+		m_buffer = (int32_t *) sdram_malloc(sizeof(int32_t)*size);
+		m_size = size;
+		reset();
+	}
+
+	void gain(int32_t gain_q27, bool adjustGain=false)
+	{
+		if (float_to_q27(0.9) <= gain_q27)
+			gain_q27 = float_to_q27(0.9);
+		m_gain = gain_q27<<3;
+		m_outgain = 8<<27;
+		if (adjustGain)
+		{
+			adjustOutputGain();
+		}
+		// LogTextMessage("%f %f", q27_to_float(m_gain)/8.0, q27_to_float(m_outgain)/8.0);
+	}
+
+	void adjustOutputGain()
+	{
+		const float cx=1.0, cy=0.35, cd=0.73;
+		float currentAdjust = 1.0/((1.0f / (cx-fabs(q27_to_float(m_gain>>3)))) * cd + cy);
+		m_outgain = float_to_q27(currentAdjust)<<3;
+		m_adjustGain = true;
+	}
+
+	void setDamping(int32_t damping)
+	{
+		m_damper = damping;
+	}
+	
+	int32_t step(int32_t in)
+	{
+		int32_t ret = ___SMMLA(in<<2, m_gain, m_buffer[m_head]);
+		int32_t satValue = ___SMMLA(m_buffer[m_head]<<2, -m_gain, in); // N.B. negativ feedback
+		int32_t delta = prev-satValue;
+		offset =___SMMUL(m_damper<<3,offset<<2)+delta;
+		prev = satValue;
+		m_buffer[m_head++] = offset+satValue;
+		
+		if (m_head >= m_size)
+			m_head = 0;
+		if (m_adjustGain)
+		{
+			ret = ___SMMUL(ret, m_outgain)<<2;
+		}
+		return ret;
+	}
+	
+	int32_t tap(int32_t position)
+	{
+		return m_buffer[position];
+	}
+
+private:
+	int32_t m_size;
+	int32_t m_head;
+	int32_t m_gain;
+	int32_t m_outgain;
+	bool m_adjustGain;
+	int32_t *m_buffer;
+	int32_t m_damper;
+	int32_t prev;
+	int32_t offset;
+};
+FeedbackRing rng[4];]]></code.declaration>
+      <code.init><![CDATA[static int32_t sram_buffer1[attr_chainSize1];
+static int32_t sram_buffer2[attr_chainSize2];
+static int32_t sram_buffer3[attr_chainSize3];
+static int32_t sram_buffer4[attr_chainSize4];
+
+
+rng[0].initSram(attr_chainSize1, sram_buffer1);
+rng[1].initSram(attr_chainSize2, sram_buffer2);
+rng[2].initSram(attr_chainSize3, sram_buffer3);
+rng[3].initSram(attr_chainSize4, sram_buffer4);]]></code.init>
+      <code.krate><![CDATA[static int32_t oldFdbk12=123;
+if (oldFdbk12!=param_fdbk12)
+{
+	oldFdbk12 = param_fdbk12;
+	rng[0].gain(param_fdbk12);
+	rng[1].gain(param_fdbk12, true);
+}
+static int32_t oldFdbk34=123;
+if (oldFdbk34!=param_fdbk34)
+{
+	oldFdbk34 = param_fdbk34;
+	rng[2].gain(param_fdbk34);
+	rng[3].gain(param_fdbk34, true);
+}
+
+static int32_t oldDamping=123;
+if (oldDamping!=param_damping)
+{
+	oldDamping = param_damping;
+	for (int c=0; c < 4; ++c)
+	{
+		rng[c].setDamping(param_damping);
+	}
+}]]></code.krate>
+      <code.srate><![CDATA[int32_t value = inlet_in;
+
+value = rng[0].step(value);
+value = rng[1].step(value);
+value = rng[2].step(value);
+value = rng[3].step(value);
+
+outlet_out = value;]]></code.srate>
+   </obj.normal>
+</objdefs>

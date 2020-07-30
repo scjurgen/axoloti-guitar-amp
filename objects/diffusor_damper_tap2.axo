@@ -1,0 +1,156 @@
+<objdefs appVersion="2.0.0">
+   <obj.normal id="diffusor_damper_tap2" uuid="bb56dda2-7971-4190-b8c3-c10a5981b3ed">
+      <sDescription>samplesize variant combfilter with 2 taps and damper on feedback</sDescription>
+      <author>Jürgen Schwietering</author>
+      <license>MIT</license>
+      <inlets>
+         <frac32buffer name="in" description="in"/>
+         <frac32.bipolar name="fdbk" description=""/>
+         <frac32.positive name="damping" description=""/>
+      </inlets>
+      <outlets>
+         <frac32buffer name="out" description="out"/>
+         <frac32buffer name="tap1"/>
+         <frac32buffer name="tap2"/>
+      </outlets>
+      <displays/>
+      <params>
+         <int32 name="tap1">
+            <MinValue i="0"/>
+            <MaxValue i="40000"/>
+         </int32>
+         <int32 name="tap2">
+            <MinValue i="0"/>
+            <MaxValue i="40000"/>
+         </int32>
+      </params>
+      <attribs>
+         <spinner name="chainSize" MinValue="100" MaxValue="48000" DefaultValue="48000"/>
+      </attribs>
+      <file-depends/>
+      <includes/>
+      <depends/>
+      <modules/>
+      <code.declaration><![CDATA[class FeedbackRing
+{
+public:
+	FeedbackRing()
+	: m_size(0)
+	, m_head(0)
+	, m_gain(0)
+	, prev(0)
+	, offset(0)
+	{
+	}
+
+	~FeedbackRing()
+	{
+		if (m_buffer)
+			ax_free(m_buffer);	
+	}
+
+	void dispose()
+	{
+		if (m_buffer)
+			ax_free(m_buffer);	
+		m_buffer = 0;
+	}
+
+	void init(int size)
+	{
+		m_buffer = (int32_t *) sdram_malloc(size*sizeof(int32_t));
+		LogTextMessage("diffuser mem: %d", size);
+		m_size = size;
+		memset(m_buffer, 0, sizeof(int32_t)*m_size);
+		m_head = 0;
+		m_adjustGain = false;
+		prev = 0;
+		offset = 0;
+	}
+
+	void gain(int32_t gain_q27, bool adjustGain=false)
+	{
+		if (float_to_q27(0.97) <= gain_q27)
+			gain_q27 = float_to_q27(0.97);
+		m_gain = gain_q27<<3;
+		m_outgain = 8<<27;
+		if (adjustGain)
+		{
+			adjustOutputGain();
+		}
+	}
+
+	void setDamping(int32_t damping)
+	{
+		m_damper = damping;
+	}
+
+	void adjustOutputGain()
+	{
+		const float cx=1.0, cy=0.35, cd=0.73;
+		float currentAdjust = 1.0/((1.0f / (cx-fabs(q27_to_float(m_gain>>3)))) * cd + cy);
+		m_outgain = float_to_q27(currentAdjust)<<3;
+		m_adjustGain = true;
+	}
+
+	
+	int32_t tap(int32_t rel_position)
+	{
+		int h=m_head-rel_position+m_size;
+		if (h >= m_size)
+			h-=m_size;
+		return m_buffer[h];
+	}
+
+	int32_t update(const int32buffer in, int32buffer &out, int32_t tap1Pos, int32buffer &tap1, int32_t tap2Pos,int32buffer &tap2)
+	{
+		
+		int head = m_head;
+		for (int i=0; i < BUFSIZE; ++i)
+		{
+			int32_t ret = ___SMMLA(in[i]<<2, m_gain, m_buffer[m_head]);
+			int32_t satValue = ___SMMLA(m_buffer[m_head]<<2, -m_gain, in[i]); // N.B. negativ feedback
+			int32_t delta = prev-satValue;
+			offset =___SMMUL(m_damper<<3,offset<<2)+delta;
+			prev = satValue;
+		
+			m_buffer[m_head++] = offset+satValue;
+			if (m_head >= m_size)
+				m_head = 0;
+			if (m_adjustGain)
+			{
+				ret = ___SMMUL(ret, m_outgain)<<2;
+			}
+			out[i] = ret;
+			tap1[i] = tap(tap1Pos);
+			tap2[i] = tap(tap2Pos);
+		}
+	}
+
+private:
+	int32_t m_size;
+	int32_t m_head;
+	int32_t m_gain;
+	int32_t m_outgain;
+	bool m_adjustGain;
+	int32_t *m_buffer;
+     int32_t m_damper;
+	int32_t prev;
+	int32_t offset;
+};
+
+FeedbackRing rng;]]></code.declaration>
+      <code.init><![CDATA[rng.init(attr_chainSize);]]></code.init>
+      <code.dispose><![CDATA[rng.dispose();]]></code.dispose>
+      <code.krate><![CDATA[int32_t oldFdbk=123;
+
+if (oldFdbk!=inlet_fdbk)
+{
+	oldFdbk = inlet_fdbk;
+	rng.gain(oldFdbk, true);
+}
+rng.setDamping(inlet_damping);
+
+rng.update(inlet_in, outlet_out, param_tap1, outlet_tap1, param_tap2, outlet_tap2);]]></code.krate>
+   </obj.normal>
+</objdefs>

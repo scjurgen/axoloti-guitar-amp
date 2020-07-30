@@ -1,0 +1,40 @@
+<objdefs appVersion="2.0.0">
+   <obj.normal id="MidiMix" uuid="647e3ba6-e4ea-4541-ab94-97897ae5c655">
+      <license>GPL</license>
+      <inlets/>
+      <outlets>
+         <frac32.bipolar name="pot1" description=""/>
+         <frac32.bipolar name="pot2" description=""/>
+         <frac32.bipolar name="pot3" description=""/>
+         <frac32.bipolar name="slider" description=""/>
+      </outlets>
+      <displays/>
+      <params/>
+      <attribs>
+         <spinner name="channel" description="" MinValue="1" MaxValue="8" DefaultValue="1"/>
+      </attribs>
+      <file-depends/>
+      <includes/>
+      <depends/>
+      <modules/>
+      <code.declaration><![CDATA[int32_t cc_value[8] = {16,20,24,28,46,50,54,58};
+int32_t pot1=0,pot2=0,pot3=0;
+int32_t slider = 0;]]></code.declaration>
+      <code.krate><![CDATA[outlet_pot1 = pot1;
+outlet_pot2 = pot2;
+outlet_pot3 = pot3;
+outlet_slider = slider;]]></code.krate>
+      <code.midihandler><![CDATA[LogTextMessage("%02x %d %d", status, data1, data2);
+if (status == 0xB0)
+{
+	if (data1== cc_value[attr_channel])
+		pot1 = data2<<21;
+	if (data1== cc_value[attr_channel]+1)
+		pot2 = data2<<21;
+	if (data1== cc_value[attr_channel]+2)
+		pot3 = data2<<21;
+	if (data1== cc_value[attr_channel]+3)
+		slider = data2<<21;
+}]]></code.midihandler>
+   </obj.normal>
+</objdefs>

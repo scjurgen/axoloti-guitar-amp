@@ -1,0 +1,116 @@
+<objdefs appVersion="2.0.0">
+   <obj.normal id="AkaiMidiMixReverbPlate" uuid="bebf5066-c775-498a-b873-9ad22a6cfa38">
+      <license>GPL</license>
+      <inlets/>
+      <outlets>
+         <frac32.positive name="modulationFeedback" description=""/>
+         <frac32.positive name="modulationDamp" description=""/>
+         <int32 name="modulationTime" description="ModulationTime"/>
+         <int32 name="modulationTime2" description=""/>
+         <int32 name="modulationDepth" description=""/>
+         <int32 name="modulationDepth2" description=""/>
+         <frac32.bipolar name="inputDiffusorFeedback" description=""/>
+         <frac32.positive name="inputDiffusorDamping" description=""/>
+         <frac32.positive name="tankFeedback" description=""/>
+         <frac32.bipolar name="diffusorFeedback" description=""/>
+         <frac32.positive name="diffusorDamping" description=""/>
+         <int32 name="predelayMsecs" description=""/>
+      </outlets>
+      <displays/>
+      <params>
+         <int32.hradio name="program" description="">
+            <MaxValue i="8"/>
+         </int32.hradio>
+         <bool32.mom name="save" description=""/>
+      </params>
+      <attribs/>
+      <file-depends/>
+      <includes/>
+      <depends/>
+      <modules/>
+      <code.declaration><![CDATA[struct DataSet
+{
+     int32_t modulationFeedback;
+     int32_t modulationDamp;
+     int32_t modulationTime;
+     int32_t modulationDepth;
+     int32_t modulationTime2;
+     int32_t modulationDepth2;
+     
+     int32_t inputDiffusorFeedback;
+     int32_t inputDiffusorDamping;
+     
+     int32_t tankFeedback;
+     
+     int32_t diffusorFeedback;
+     int32_t diffusorDamping;
+     
+     int32_t predelayMsecs;
+};
+
+DataSet dataSet = 
+{
+	0, 0, 1900, 60, 2000,60
+	0, 0, 
+	0, 
+	0, 0, 
+	100
+};]]></code.declaration>
+      <code.krate><![CDATA[outlet_modulationTime = dataSet.modulationTime;
+outlet_modulationFeedback = dataSet.modulationFeedback;
+outlet_modulationDamp = dataSet.modulationDamp;
+outlet_modulationDepth = dataSet.modulationDepth;
+outlet_modulationTime2 = dataSet.modulationTime2;
+outlet_modulationDepth2 = dataSet.modulationDepth2;
+outlet_inputDiffusorFeedback = dataSet.inputDiffusorFeedback;
+outlet_inputDiffusorDamping = dataSet.inputDiffusorDamping;
+outlet_tankFeedback = dataSet.tankFeedback;
+outlet_diffusorFeedback = dataSet.diffusorFeedback;
+outlet_diffusorDamping = dataSet.diffusorDamping;
+outlet_predelayMsecs = dataSet.predelayMsecs;]]></code.krate>
+      <code.midihandler><![CDATA[LogTextMessage("%02x %d %d", status, data1, data2);
+if (status==0xB0)
+{
+	switch(data1)
+	{
+		case 16:
+			dataSet.modulationFeedback = data2<<20;
+			break;
+		case 17:
+			dataSet.modulationDamp = data2<<20;
+			break;
+		case 18:
+			dataSet.modulationTime = data2<<4;
+			break;
+		case 19:
+			dataSet.modulationDepth = data2<<1;
+			break;
+		case 22:
+			dataSet.modulationTime2 = data2<<4;
+			break;
+		case 23:
+			dataSet.modulationDepth2 = data2<<1;
+			break;
+		case 24:
+			dataSet.inputDiffusorFeedback = data2<<20;
+			break;
+		case 25:
+			dataSet.inputDiffusorDamping = data2<<20;
+			break;
+
+		case 26:
+			dataSet.tankFeedback = data2<<20;
+			break;
+		case 27:
+			dataSet.diffusorFeedback = data2<<10;
+			break;
+		case 30:
+			dataSet.diffusorDamping = data2<<10;
+			break;
+		case 31:
+			dataSet.predelayMsecs = data2<<1;
+			break;
+	}
+}]]></code.midihandler>
+   </obj.normal>
+</objdefs>

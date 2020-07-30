@@ -1,0 +1,1340 @@
+<patch appVersion="2.0.0">
+   <obj type="audio/out stereo" uuid="a1ca7a567f535acc21055669829101d3ee7f0189" name="out_1" x="798" y="14">
+      <params/>
+      <attribs/>
+   </obj>
+   <obj type="audio/outconfig" uuid="eace67e3304afaa1bb695b444e9345f2d8adaf00" name="outconfig_1" x="1246" y="14">
+      <params/>
+      <attribs>
+         <combo attributeName="headphones" selection="0dB"/>
+         <combo attributeName="mode" selection="Stereo"/>
+      </attribs>
+   </obj>
+   <patchobj type="patch/object" uuid="4d342add-7865-4255-a30b-ad9156153273" name="Amp/Cab" x="406" y="28">
+      <params>
+         <bool32.tgl name="onoff" value="1">
+            <presets/>
+         </bool32.tgl>
+         <frac32.u.map name="level" value="47.5">
+            <modulators/>
+            <presets/>
+         </frac32.u.map>
+         <frac32.u.map name="efxMix" value="51.5">
+            <modulators/>
+            <presets>
+               <preset index="1">
+                  <f v="12.0"/>
+               </preset>
+               <preset index="2">
+                  <f v="12.0"/>
+               </preset>
+               <preset index="3">
+                  <f v="39.5"/>
+               </preset>
+               <preset index="4">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="5">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="6">
+                  <f v="17.5"/>
+               </preset>
+               <preset index="7">
+                  <f v="17.5"/>
+               </preset>
+               <preset index="8">
+                  <f v="17.5"/>
+               </preset>
+            </presets>
+         </frac32.u.map>
+         <frac32.s.map name="gainLow" value="0.0">
+            <modulators/>
+            <presets/>
+         </frac32.s.map>
+         <frac32.s.map name="gainMid" value="0.0">
+            <modulators/>
+            <presets/>
+         </frac32.s.map>
+         <frac32.s.map name="gainHigh" value="10.0">
+            <modulators/>
+            <presets/>
+         </frac32.s.map>
+      </params>
+      <attribs/>
+      <object id="Amp/Cab" uuid="4d342add-7865-4255-a30b-ad9156153273">
+         <inlets>
+            <frac32buffer name="in" description=""/>
+            <frac32buffer name="returnEfxLeft" description=""/>
+            <frac32buffer name="returnEfxRight" description=""/>
+         </inlets>
+         <outlets>
+            <frac32buffer name="left" description=""/>
+            <frac32buffer name="right" description=""/>
+            <frac32buffer name="sendEfx" description=""/>
+         </outlets>
+         <displays/>
+         <params>
+            <bool32.tgl name="onoff" description="onoff"/>
+            <frac32.u.map.gain name="level" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.u.map.gain>
+            <frac32.u.map.ratio name="efxMix" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.u.map.ratio>
+            <frac32.s.map.ratio name="gainLow" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.s.map.ratio>
+            <frac32.s.map.ratio name="gainMid" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.s.map.ratio>
+            <frac32.s.map.ratio name="gainHigh" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.s.map.ratio>
+         </params>
+         <attribs/>
+         <file-depends/>
+         <includes>
+            <include>/Users/jurgenschwietering/Desktop/axoloti-amp/FilterChain.h</include>
+         </includes>
+         <depends/>
+         <modules/>
+         <code.declaration><![CDATA[#define SAMPLE_RATE 48000
+
+#define M_PI 3.1415926535
+
+
+FilterSet<12> initialSetAmp ={ // dt = 0.034968 - 'amps/DeluxeVerbVib-InputDrive1.csv'
+1.5, 12, {
+    {LoShelf, 2, EQ_NONE, 71.2719, 3.06, 1.58},	//  0 
+    {HiShelf, 1, EQ_NONE, 5529.91, 6.72, 1.36},	//  1 
+    {HiPass, 2, EQ_NONE, 48.493, 0, 0.441},	//  2 
+    {LoPass, 1, EQ_NONE, 16255, 0, 1.2},	//  3 
+    {Peak, 2, EQ_NONE, 63.496, 3.24, 19.881},	//  4 
+    {Peak, 1, EQ_NONE, 8446.57, 5.62, 0.32},	//  5 
+    {Peak, 1, EQ_NONE, 320, -8.2, 0.46},	//  6 
+    {Peak, 1, EQ_NONE, 517.844, -5.56, 0.77},	//  7 
+    {Peak, 1, EQ_NONE, 1055.82, -4.14, 0.5},	//  8 
+    {LoShelf, 1, EQ_LOW, 120, 0.0, 0.707},	//  9
+    {Peak, 1, EQ_MID, 500, 0.0, 0.707},	//  10
+    {HiShelf, 1, EQ_HIGH, 3000, 0.0, 0.707},	//  11 
+}};
+/*
+FilterSet<12> initialSetCab ={ // dt = 0.791910 - 'cabs/DeluxeVerbMix.csv'
+0.6, 12, {
+    {LoPass, 2, EQ_NONE, 8446.57, 0, 0.196},	//  0 
+    {LoPass, 2, EQ_NONE, 5000.57, 0, 0.707},	//  0 
+    {HiPass, 1, EQ_NONE, 68.5795, 0, 1.444},	//  1 
+    {LoShelf, 1, EQ_NONE, 339.028, 0.62, 38.416},	//  2 
+    {HiShelf, 1, EQ_NONE, 538.174, 5.16, 0.289},	//  3 
+    {Peak, 1, EQ_NONE, 718.376, -9.92, 34.969},	//  4 
+    {Peak, 1, EQ_NONE, 2764.95, 8.84, 0.841},	//  5 
+    {Peak, 1, EQ_NONE, 124.57, -3.26, 4.9},	//  6 
+    {Notch, 1, EQ_NONE, 1676.01, 0, 7.569},	//  7 
+    {Peak, 1, EQ_NONE, 411.013, 11.42, 35.344},	//  8 
+    {Peak, 1, EQ_NONE, 1208.16, -9.72, 28.224},	//  9 
+    {Notch, 1, EQ_NONE, 3163.89, 0, 5.625},	// 10 
+}};
+*/
+FilterSet<10> initialSetCab ={ // dt = 1.100675 - 'cabs/DeluxeVerbMix.csv'
+1.08318, 10, {
+    {LoPass, 2, EQ_NONE, 3620.39, 0, 1.125},	//  0 
+    {LoPass, 2, EQ_NONE, 4561.4, 0, 39.601},	//  1 
+    {HiPass, 1, EQ_NONE, 53.3936, 0, 1.089},	//  2 
+//    {LoShelf, 1, EQ_NONE, 209.502, -0.84, 3.025},	//  3 
+//    {HiShelf, 1, EQ_NONE, 1881.26, 0.94, 10.609},	//  4 
+    {Peak, 1, EQ_NONE, 1304.88, 2.46, 16.9},	//  5 
+    //{Peak, 1, EQ_NONE, 3690.77, 0.7, 0.025},	//  6 
+    //{Peak, 1, EQ_NONE, 4142.75, 1, 3.481},	//  7 
+    {Notch, 1, EQ_NONE, 2986.31, 0, 21.316},	//  8 
+    {Peak, 1, EQ_NONE, 470.315, 2.34, 25.6},	//  9 
+    {Peak, 1, EQ_NONE, 704.676, -2.7, 13.456},	// 10 
+    {Notch, 1, EQ_NONE, 4389.09, 0, 0.5},	// 11 
+    {Notch, 1, EQ_NONE, 1185.12, 0, 28.561},	// 12 
+    {Peak, 1, EQ_NONE, 1015.94, 2.26, 5.929},	// 13 
+}};
+
+FilterChain<12,0> ampChain;
+FilterChain<10,0> cabChainLeft;
+FilterChain<10,0> cabChainRight;]]></code.declaration>
+         <code.init><![CDATA[ampChain.setParams(initialSetAmp);
+cabChainLeft.setParams(initialSetCab);
+cabChainRight.setParams(initialSetCab);]]></code.init>
+         <code.dispose><![CDATA[ampChain.dispose();
+cabChainLeft.dispose();
+cabChainRight.dispose();]]></code.dispose>
+         <code.krate><![CDATA[static int krateCount=2990;
+if (krateCount++ >= 1000)
+{
+	ampChain.setGain(q27_to_float(param_gainLow), q27_to_float(param_gainMid), q27_to_float(param_gainHigh));
+	krateCount = 0;
+//	krate30(parameters);
+}
+
+
+int32buffer result;
+int32buffer feed;
+int32buffer dry;
+
+if (param_onoff)
+	ampChain.dsp(inlet_in, dry);
+else
+	memcpy(dry, inlet_in, sizeof(dry));
+memcpy(outlet_sendEfx, dry, sizeof(dry));
+
+for (int s=0; s < 16; ++s)
+{
+	int32_t accum = ___SMMUL(inlet_returnEfxLeft[s]<<3, param_efxMix<<3);
+	feed[s] =  dry[s] + accum;
+}
+if (param_onoff)
+	cabChainLeft.dsp(feed, result);
+else
+	memcpy(result, feed, sizeof(dry));
+
+for (int s=0; s < 16; ++s)
+{
+	outlet_left[s] =___SMMUL(param_level,result[s]<<2);
+}
+
+for (int s=0; s < 16; ++s)
+{
+	int32_t accum = ___SMMUL(inlet_returnEfxRight[s]<<3, param_efxMix<<3);
+	feed[s] =  dry[s] + accum;
+}
+if (param_onoff)
+	cabChainRight.dsp(feed, result);
+else
+	memcpy(result, feed, sizeof(dry));
+
+for (int s=0; s < 16; ++s)
+{
+	outlet_right[s] =___SMMUL(param_level,result[s]<<3);
+}]]></code.krate>
+         <code.srate><![CDATA[]]></code.srate>
+         <code.midihandler><![CDATA[]]></code.midihandler>
+      </object>
+   </patchobj>
+   <obj type="audio/inconfig" uuid="9a80ef3c19f2a8f81da3a3b7c1c44d18126b97d9" name="inconfig_1" x="14" y="42">
+      <params/>
+      <attribs>
+         <combo attributeName="gain" selection="15dB"/>
+         <combo attributeName="boost" selection="0dB"/>
+         <combo attributeName="mode" selection="Stereo"/>
+      </attribs>
+   </obj>
+   <patchobj type="patch/object" uuid="f4862da9-9964-4a80-b193-84a6c8003dd1" name="Distortion_1" x="196" y="56">
+      <params>
+         <frac32.u.map name="dryWet" value="0.0">
+            <modulators/>
+            <presets>
+               <preset index="1">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="2">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="3">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="4">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="5">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="6">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="7">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="8">
+                  <f v="64.0"/>
+               </preset>
+            </presets>
+         </frac32.u.map>
+         <int32 name="tone" value="2250">
+            <presets/>
+         </int32>
+         <int32.small name="splitLow" value="62">
+            <presets/>
+         </int32.small>
+         <int32.small name="splitHigh" value="594">
+            <presets/>
+         </int32.small>
+         <frac32.u.map name="gainLow" value="13.0">
+            <modulators/>
+            <presets>
+               <preset index="1">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="2">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="3">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="4">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="5">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="6">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="7">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="8">
+                  <f v="0.0"/>
+               </preset>
+            </presets>
+         </frac32.u.map>
+         <frac32.s.map name="biasLow" value="0.0">
+            <modulators/>
+            <presets>
+               <preset index="1">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="2">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="3">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="4">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="5">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="6">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="7">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="8">
+                  <f v="0.0"/>
+               </preset>
+            </presets>
+         </frac32.s.map>
+         <frac32.u.map name="levelLow" value="32.0">
+            <modulators/>
+            <presets>
+               <preset index="1">
+                  <f v="62.5"/>
+               </preset>
+               <preset index="2">
+                  <f v="62.5"/>
+               </preset>
+               <preset index="3">
+                  <f v="62.5"/>
+               </preset>
+               <preset index="4">
+                  <f v="62.5"/>
+               </preset>
+               <preset index="5">
+                  <f v="62.5"/>
+               </preset>
+               <preset index="6">
+                  <f v="62.5"/>
+               </preset>
+               <preset index="7">
+                  <f v="62.5"/>
+               </preset>
+               <preset index="8">
+                  <f v="62.5"/>
+               </preset>
+            </presets>
+         </frac32.u.map>
+         <frac32.u.map name="gainMid" value="25.5">
+            <modulators/>
+            <presets>
+               <preset index="1">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="2">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="3">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="4">
+                  <f v="41.0"/>
+               </preset>
+               <preset index="5">
+                  <f v="41.0"/>
+               </preset>
+               <preset index="6">
+                  <f v="41.0"/>
+               </preset>
+               <preset index="7">
+                  <f v="41.0"/>
+               </preset>
+               <preset index="8">
+                  <f v="41.0"/>
+               </preset>
+            </presets>
+         </frac32.u.map>
+         <frac32.s.map name="biasMid" value="-1.0">
+            <modulators/>
+            <presets>
+               <preset index="1">
+                  <f v="3.885780586188048E-16"/>
+               </preset>
+               <preset index="2">
+                  <f v="5.0"/>
+               </preset>
+               <preset index="3">
+                  <f v="4.0"/>
+               </preset>
+               <preset index="4">
+                  <f v="4.0"/>
+               </preset>
+               <preset index="5">
+                  <f v="4.0"/>
+               </preset>
+               <preset index="6">
+                  <f v="4.0"/>
+               </preset>
+               <preset index="7">
+                  <f v="4.0"/>
+               </preset>
+               <preset index="8">
+                  <f v="4.0"/>
+               </preset>
+            </presets>
+         </frac32.s.map>
+         <frac32.u.map name="levelMid" value="43.0">
+            <modulators/>
+            <presets>
+               <preset index="1">
+                  <f v="34.0"/>
+               </preset>
+               <preset index="2">
+                  <f v="51.5"/>
+               </preset>
+               <preset index="3">
+                  <f v="29.5"/>
+               </preset>
+               <preset index="4">
+                  <f v="29.5"/>
+               </preset>
+               <preset index="5">
+                  <f v="29.5"/>
+               </preset>
+               <preset index="6">
+                  <f v="29.5"/>
+               </preset>
+               <preset index="7">
+                  <f v="29.5"/>
+               </preset>
+               <preset index="8">
+                  <f v="29.5"/>
+               </preset>
+            </presets>
+         </frac32.u.map>
+         <frac32.u.map name="gainHigh" value="64.0">
+            <modulators/>
+            <presets>
+               <preset index="1">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="2">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="3">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="4">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="5">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="6">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="7">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="8">
+                  <f v="64.0"/>
+               </preset>
+            </presets>
+         </frac32.u.map>
+         <frac32.s.map name="biasHigh" value="4.718447854656915E-16">
+            <modulators/>
+            <presets>
+               <preset index="1">
+                  <f v="-21.0"/>
+               </preset>
+               <preset index="2">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="3">
+                  <f v="-18.0"/>
+               </preset>
+               <preset index="4">
+                  <f v="-18.0"/>
+               </preset>
+               <preset index="5">
+                  <f v="-18.0"/>
+               </preset>
+               <preset index="6">
+                  <f v="-18.0"/>
+               </preset>
+               <preset index="7">
+                  <f v="-18.0"/>
+               </preset>
+               <preset index="8">
+                  <f v="-18.0"/>
+               </preset>
+            </presets>
+         </frac32.s.map>
+         <frac32.u.map name="levelHigh" value="44.5">
+            <modulators/>
+            <presets>
+               <preset index="1">
+                  <f v="15.0"/>
+               </preset>
+               <preset index="2">
+                  <f v="15.0"/>
+               </preset>
+               <preset index="3">
+                  <f v="15.0"/>
+               </preset>
+               <preset index="4">
+                  <f v="15.0"/>
+               </preset>
+               <preset index="5">
+                  <f v="15.0"/>
+               </preset>
+               <preset index="6">
+                  <f v="15.0"/>
+               </preset>
+               <preset index="7">
+                  <f v="15.0"/>
+               </preset>
+               <preset index="8">
+                  <f v="15.0"/>
+               </preset>
+            </presets>
+         </frac32.u.map>
+      </params>
+      <attribs/>
+      <object id="Distortion_1" uuid="f4862da9-9964-4a80-b193-84a6c8003dd1">
+         <inlets>
+            <frac32buffer name="in" description=""/>
+         </inlets>
+         <outlets>
+            <frac32buffer name="out" description=""/>
+         </outlets>
+         <displays/>
+         <params>
+            <frac32.u.map.ratio name="dryWet" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.u.map.ratio>
+            <int32 name="tone" description="">
+               <MinValue i="1000"/>
+               <MaxValue i="10000"/>
+            </int32>
+            <int32.mini name="splitLow" description="">
+               <MinValue i="40"/>
+               <MaxValue i="640"/>
+            </int32.mini>
+            <int32.mini name="splitHigh" description="">
+               <MinValue i="100"/>
+               <MaxValue i="2000"/>
+            </int32.mini>
+            <frac32.u.map name="gainLow" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.u.map>
+            <frac32.s.map name="biasLow" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.s.map>
+            <frac32.u.map name="levelLow" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.u.map>
+            <frac32.u.map name="gainMid" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.u.map>
+            <frac32.s.map name="biasMid" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.s.map>
+            <frac32.u.map name="levelMid" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.u.map>
+            <frac32.u.map name="gainHigh" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.u.map>
+            <frac32.s.map name="biasHigh" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.s.map>
+            <frac32.u.map name="levelHigh" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.u.map>
+         </params>
+         <attribs/>
+         <file-depends/>
+         <includes>
+            <include>/Users/jurgenschwietering/Desktop/axoloti-amp/FilterChain.h</include>
+         </includes>
+         <depends/>
+         <modules/>
+         <code.declaration><![CDATA[typedef struct
+{
+    float dryWetMix;
+    float gain[3];
+    float dcBias[3];
+    float level[3];
+    int seperationFrequency[2];
+    int tone;
+} DistortionParameters;
+
+class Distortion
+{
+public:
+#ifndef M_PI_4
+#define M_PI_4 (3.1415926535897932384626433832795f/4.0f)
+#endif
+
+float __attribute__ ((noinline)) FastArcTan(float x) {
+  return M_PI_4*x - x*(fabs(x) - 1)*(0.2447f + 0.0663f*fabs(x));
+}
+
+	const float maxGain = 50.0f;
+     Distortion()
+        : m_dryWet(0.0), m_gain{0.1, 0.1, 0.1}, m_dcBias{0.0, 0.0, 0.0}
+    {
+        cnt = 0;
+        removeDc.setHighpass(30,0.707);
+        DistortionParameters initialDistortion =
+            {
+                1.0,{0.0,0.1,0.0},{0.0,0.0,0.0},{0.5,0.7,0.4},{70,500},5000
+            };
+
+        parameters(initialDistortion);
+    }
+
+    float __attribute__ ((noinline)) step(float in, int set)
+    {
+        if (m_gain[set] == 0.0)
+            return in * m_level[set]*4.0;
+        return atan(m_atanGain[set] * (in + m_dcBias[set])) * m_totalGain[set];
+    }
+
+    void __attribute__ ((noinline)) step(FloatBuffer &inPlace, int set)
+    {
+        if (m_gain[set] == 0.0)
+        {
+	        for (int s = 0; s < BUFSIZE; ++s)
+	        {
+		        inPlace[s] = inPlace[s] * m_level[set] * 4.0f;
+	        }
+        }
+        else
+        {
+	        for (int s = 0; s < BUFSIZE; ++s)
+	        {
+	            inPlace[s] = atan(m_atanGain[set] * (inPlace[s] + m_dcBias[set])) * m_totalGain[set];
+	        }
+        }
+    }
+
+    void parameters(DistortionParameters &params)
+    {
+    		if (paramsSet.dryWetMix != params.dryWetMix)
+    		{
+    	        m_dryWet = params.dryWetMix;
+    	        //LogTextMessage("drywet: %f", m_dryWet);
+	        paramsSet.dryWetMix = params.dryWetMix;
+    		}
+    		
+        for (int c = 0; c < 3; ++c)
+        {
+            m_dcBias[c] = params.dcBias[c]/2.0;
+            m_level[c] = params.level[c];
+		  {
+	            m_gain[c] = params.gain[c]*2.0;
+	            if (m_gain[c] == 0.0)
+	            {
+	                m_realAdjustGain[c] = 1.0;
+	            } else
+	            {
+	                m_realAdjustGain[c] = 1.0 / atan(m_gain[c] * maxGain);
+	            }
+	            paramsSet.gain[c] = params.gain[c];
+		  }
+		  m_totalGain[c] = m_realAdjustGain[c] * m_level[c];
+		  m_atanGain[c] = m_gain[c] * maxGain;
+        }
+        if (paramsSet.seperationFrequency[0] != params.seperationFrequency[0])
+        {
+        	   float f = params.seperationFrequency[0];
+        	   LogTextMessage("f=%d", (int)f);
+	        lowBandFilter.setLowpass(f*2);
+	        midBandFilter[0].setHighpass(f);
+	        paramsSet.seperationFrequency[0] = params.seperationFrequency[0];
+        }
+        if (paramsSet.seperationFrequency[1] != params.seperationFrequency[1])
+        {
+        	   float f = paramsSet.seperationFrequency[1];
+        	   LogTextMessage("MB HP f=%d", (int)f);
+        	   midBandFilter[1].setLowpass(f*2);
+        	   upperBandFilter.setHighpass(f);
+	        paramsSet.seperationFrequency[1] = params.seperationFrequency[1];
+        }
+
+        if (paramsSet.tone != params.tone)   
+        {
+        	    float f = params.tone;
+	        lp.setLowpass(f, 0.5);// softer falling off
+	        paramsSet.tone = params.tone;
+    	   }
+    }
+
+    void update(const int32buffer inInt, int32buffer &outInt)
+    {
+        if (m_dryWet == 0.0)
+        {
+        	  memcpy(outInt, inInt, sizeof(int32buffer));
+            return;
+        }
+        FloatBuffer in;
+        for (int i = 0; i < BUFSIZE; ++i)
+        {
+        	in[i] = q27_to_float(inInt[i]);
+        }
+
+        FloatBuffer tmp;
+        FloatBuffer lowBand;
+        FloatBuffer midBand;
+        FloatBuffer upperBand;
+        
+        lowBandFilter.update(in, lowBand, BUFSIZE);
+
+        upperBandFilter.update(in, upperBand, BUFSIZE);
+        midBandFilter[0].update(in, tmp, BUFSIZE);
+        midBandFilter[1].update(tmp, midBand, BUFSIZE);
+        step(lowBand, 0);
+        step(midBand, 1);
+        step(upperBand, 2);
+
+        for (int i = 0; i < BUFSIZE; ++i)
+        {
+            tmp[i] = (lowBand[i] + midBand[i] + upperBand[i]) / 2 * m_dryWet;
+        }
+        FloatBuffer res;
+
+        lp.update(tmp, res, BUFSIZE);
+        removeDc.update(res, tmp,BUFSIZE);
+        for (int i = 0; i < BUFSIZE; ++i)
+        {
+        	outInt[i] = float_to_q27(tmp[i]+in[i] * (1.0-m_dryWet));
+        }
+
+    }
+
+
+private:
+    AudioFilterBiquad lp;
+    AudioFilterBiquad removeDc;
+    AudioFilterBiquad lowBandFilter;
+    AudioFilterBiquad midBandFilter[2];
+    AudioFilterBiquad upperBandFilter;
+    float m_dryWet;
+    float m_gain[3];
+    float m_level[3];
+    float m_dcBias[3];
+    float m_totalGain[3];
+    float m_atanGain[3];
+    float m_realAdjustGain[3];
+    float maxvalSum;
+    float minVal, maxVal;
+	DistortionParameters paramsSet;
+    int cnt;
+};
+
+Distortion distortion;]]></code.declaration>
+         <code.init><![CDATA[]]></code.init>
+         <code.dispose><![CDATA[]]></code.dispose>
+         <code.krate><![CDATA[static int kcnt = 0;
+if (kcnt++>1000)
+{
+	DistortionParameters params;
+	params.dryWetMix = q27_to_float(param_dryWet);
+	params.gain[0] = q27_to_float(param_gainLow);
+	params.gain[1] = q27_to_float(param_gainMid);
+	params.gain[2] = q27_to_float(param_gainHigh);
+	params.dcBias[0] = q27_to_float(param_biasLow)/2.0;
+	params.dcBias[1] = q27_to_float(param_biasMid)/2.0;
+	params.dcBias[2] = q27_to_float(param_biasHigh)/2.0;
+	params.level[0] = q27_to_float(param_levelLow);
+	params.level[1] = q27_to_float(param_levelMid);
+	params.level[2] = q27_to_float(param_levelHigh);
+	params.tone = (param_tone);
+	params.seperationFrequency[0] = (param_splitLow);
+	params.seperationFrequency[1] = (param_splitHigh);
+	distortion.parameters(params);
+
+	kcnt = 0;
+}
+
+
+distortion.update(inlet_in, outlet_out);]]></code.krate>
+         <code.srate><![CDATA[]]></code.srate>
+         <code.midihandler><![CDATA[]]></code.midihandler>
+      </object>
+   </patchobj>
+   <patchobj type="patch/object" uuid="2710898e-2b1c-4e0f-9622-45723d38b985" name="predelay_slap" x="728" y="126">
+      <params/>
+      <attribs/>
+      <object id="patch/object" uuid="2710898e-2b1c-4e0f-9622-45723d38b985">
+         <author>Jürgen Schwietering</author>
+         <license>BSD</license>
+         <helpPatch>fdbkcomb.axh</helpPatch>
+         <inlets>
+            <frac32buffer name="in" description="in"/>
+            <int32 name="msecs" description=""/>
+         </inlets>
+         <outlets>
+            <frac32buffer name="out" description="out"/>
+         </outlets>
+         <displays/>
+         <params/>
+         <attribs/>
+         <file-depends/>
+         <includes/>
+         <depends/>
+         <modules/>
+         <code.declaration><![CDATA[const int32_t maxSize = 9600+48*2; // max 200msecs
+int32_t *d;
+int32_t head;
+int32_t tail;]]></code.declaration>
+         <code.init><![CDATA[d=(int32_t *) sdram_malloc(sizeof(int32_t)*maxSize);
+memset(d,0, sizeof(int32_t)*maxSize);
+
+head = 0;]]></code.init>
+         <code.dispose><![CDATA[ax_free(d);]]></code.dispose>
+         <code.krate><![CDATA[]]></code.krate>
+         <code.srate><![CDATA[outlet_out = d[tail++];
+d[head++] = inlet_in;
+
+if (head >= maxSize)
+{
+	head = 0;
+	tail = maxSize - (inlet_msecs*48+1);
+}
+
+if (tail >= maxSize)
+{
+	tail = 0;
+}]]></code.srate>
+         <code.midihandler><![CDATA[]]></code.midihandler>
+      </object>
+   </patchobj>
+   <obj type="input_diffusor" uuid="c0927fc8-cefa-4925-9eab-de5b0ac11df5" name="input_diffusor_1" x="910" y="126">
+      <params/>
+      <attribs>
+         <spinner attributeName="chainSize1" value="227"/>
+         <spinner attributeName="chainSize2" value="173"/>
+         <spinner attributeName="chainSize3" value="607"/>
+         <spinner attributeName="chainSize4" value="443"/>
+      </attribs>
+   </obj>
+   <patchobj type="patch/object" uuid="4cbdc865-dce8-48e1-9c86-f69e3b6d101c" name="long_time_decay_feedback" x="1120" y="126">
+      <params/>
+      <attribs/>
+      <object id="patch/object" uuid="4cbdc865-dce8-48e1-9c86-f69e3b6d101c">
+         <sDescription>Feedback mixer (Mono in x1, Stereo feedback)</sDescription>
+         <author>Juergen Schwietering</author>
+         <license>BSD</license>
+         <inlets>
+            <frac32buffer name="mono" description="mono, no gain"/>
+            <frac32buffer name="left" description="input left"/>
+            <frac32buffer name="right" description="input right"/>
+            <frac32.positive name="feedback" description=""/>
+         </inlets>
+         <outlets>
+            <frac32buffer name="left" description="mix out"/>
+            <frac32buffer name="right"/>
+         </outlets>
+         <displays/>
+         <params/>
+         <attribs/>
+         <file-depends/>
+         <includes/>
+         <depends/>
+         <modules/>
+         <code.declaration><![CDATA[]]></code.declaration>
+         <code.init><![CDATA[]]></code.init>
+         <code.dispose><![CDATA[]]></code.dispose>
+         <code.krate><![CDATA[]]></code.krate>
+         <code.srate><![CDATA[int32_t accum = ___SMMUL(inlet_left<<2, inlet_feedback<<3);
+// add and saturate
+outlet_left =  __SSAT(inlet_mono + accum, 28);
+accum = ___SMMUL(inlet_right<<2, inlet_feedback<<3);
+outlet_right =  __SSAT(inlet_mono + accum, 28);]]></code.srate>
+         <code.midihandler><![CDATA[]]></code.midihandler>
+      </object>
+   </patchobj>
+   <obj type="audio/in stereo" uuid="99848ad6d90a8e615e83b2e619cfc806f28e7281" name="in_1" x="42" y="140">
+      <params/>
+      <attribs/>
+   </obj>
+   <obj type="disp/i" uuid="5e35fd0c62d81e70017289250cf28edd26e19e4a" name="i_1" x="728" y="210">
+      <params/>
+      <attribs/>
+   </obj>
+   <patchobj type="patch/object" uuid="86c089fb-1efb-4da0-8d5a-5d1ddfba4413" name="stereo_highpass" x="546" y="336">
+      <params>
+         <frac32.s.map name="pitch" value="-24.799999713897705">
+            <modulators/>
+            <presets/>
+         </frac32.s.map>
+         <frac32.u.map name="reso" value="17.5">
+            <modulators/>
+            <presets/>
+         </frac32.u.map>
+      </params>
+      <attribs/>
+      <object id="patch/object" uuid="86c089fb-1efb-4da0-8d5a-5d1ddfba4413">
+         <sDescription>2-pole resonant band-pass filter (biquad)</sDescription>
+         <author>Johannes Taelman</author>
+         <license>BSD</license>
+         <helpPatch>filter.axh</helpPatch>
+         <inlets>
+            <frac32buffer name="left" description="filter input"/>
+            <frac32buffer name="right"/>
+         </inlets>
+         <outlets>
+            <frac32buffer name="left" description="filter output"/>
+            <frac32buffer name="right"/>
+         </outlets>
+         <displays/>
+         <params>
+            <frac32.s.map.pitch name="pitch">
+               <DefaultValue v="0.0"/>
+            </frac32.s.map.pitch>
+            <frac32.u.map.filterq name="reso">
+               <DefaultValue v="0.707"/>
+            </frac32.u.map.filterq>
+         </params>
+         <attribs/>
+         <file-depends/>
+         <includes/>
+         <depends/>
+         <modules/>
+         <code.declaration><![CDATA[biquad_coefficients bc;
+biquad_state bs[2];]]></code.declaration>
+         <code.init><![CDATA[biquad_clearstate(&bs[0]);
+biquad_clearstate(&bs[1]);]]></code.init>
+         <code.dispose><![CDATA[]]></code.dispose>
+         <code.krate><![CDATA[static int32_t oldPitch=-1, oldReso=-1;
+
+if ((oldPitch != param_pitch) || (oldReso != param_reso))
+{ // only recalculate if changed 
+	int32_t freq;
+	MTOF(param_pitch,freq);
+	biquad_hp_coefs(&bc,freq,INT_MAX - (__USAT(param_reso,27)<<4));
+	oldPitch = param_pitch;
+	oldReso = param_reso;
+}
+
+biquad_dsp(&bs[0],&bc,inlet_left,outlet_left);
+biquad_dsp(&bs[1],&bc,inlet_right,outlet_right);]]></code.krate>
+         <code.srate><![CDATA[]]></code.srate>
+         <code.midihandler><![CDATA[]]></code.midihandler>
+      </object>
+   </patchobj>
+   <obj type="delay3taps" uuid="3e728861-0bb9-4d08-a428-b1eb2014b77c" name="delay3taps_1" x="826" y="378">
+      <params>
+         <int32 name="width" value="7182">
+            <presets/>
+         </int32>
+         <int32 name="tap1" value="3210">
+            <presets/>
+         </int32>
+         <int32 name="tap2" value="5850">
+            <presets/>
+         </int32>
+         <int32 name="tap3" value="569">
+            <presets/>
+         </int32>
+      </params>
+      <attribs/>
+   </obj>
+   <obj type="diffusor_damper_tap2" uuid="bb56dda2-7971-4190-b8c3-c10a5981b3ed" name="diffusor_damper_tap2_2" x="1050" y="378">
+      <params>
+         <int32 name="tap1" value="299">
+            <presets/>
+         </int32>
+         <int32 name="tap2" value="1965">
+            <presets/>
+         </int32>
+      </params>
+      <attribs>
+         <spinner attributeName="chainSize" value="2903"/>
+      </attribs>
+   </obj>
+   <obj type="delay2taps" uuid="7a0a72ad-0ad2-4526-a0a8-66c24392721f" name="delay2taps_1" x="1204" y="378">
+      <params>
+         <int32 name="width" value="5952">
+            <presets/>
+         </int32>
+         <int32 name="tap1" value="1726">
+            <presets/>
+         </int32>
+         <int32 name="tap2" value="4306">
+            <presets/>
+         </int32>
+         <int32 name="tap3" value="669">
+            <presets/>
+         </int32>
+      </params>
+      <attribs/>
+   </obj>
+   <obj type="modFdbkDelay" uuid="37e2fa21-a574-4976-98bb-2f9347702d30" name="modFdbkDelay_1" x="672" y="392">
+      <params/>
+      <attribs>
+         <spinner attributeName="width" value="1217"/>
+      </attribs>
+   </obj>
+   <patchobj type="patch/object" uuid="c251ba58-a42c-414c-90f8-1ffe1e20b215" name="downmix" x="1344" y="392">
+      <params/>
+      <attribs/>
+      <object id="patch/object" uuid="c251ba58-a42c-414c-90f8-1ffe1e20b215">
+         <sDescription>7 input downmix</sDescription>
+         <author>Johannes Taelman</author>
+         <license>BSD</license>
+         <inlets>
+            <frac32buffer name="p_in1" description="input 1"/>
+            <frac32buffer name="p_in2" description="input 2"/>
+            <frac32buffer name="n_in3" description="input 3"/>
+            <frac32buffer name="p_in4" description="input 4"/>
+            <frac32buffer name="n_in5" description="input 5"/>
+            <frac32buffer name="n_in6" description="input 6"/>
+            <frac32buffer name="n_in7" description="input 7"/>
+            <frac32buffer name="p_in8" description=""/>
+         </inlets>
+         <outlets>
+            <frac32buffer name="out" description="mix out"/>
+         </outlets>
+         <displays/>
+         <params/>
+         <attribs/>
+         <file-depends/>
+         <includes/>
+         <depends/>
+         <modules/>
+         <code.declaration><![CDATA[]]></code.declaration>
+         <code.init><![CDATA[]]></code.init>
+         <code.dispose><![CDATA[]]></code.dispose>
+         <code.krate><![CDATA[]]></code.krate>
+         <code.srate><![CDATA[int32_t a = inlet_p__in1;
+
+a += inlet_p__in2;
+a -= inlet_n__in3;
+a += inlet_p__in4;
+a -= inlet_n__in5;
+a -= inlet_n__in6;
+a -= inlet_n__in7;
+a += inlet_p__in8;
+outlet_out = a;]]></code.srate>
+         <code.midihandler><![CDATA[]]></code.midihandler>
+      </object>
+   </patchobj>
+   <obj type="disp/dial p" uuid="44fd18b562e434b3230441681132dbeabb15cdc5" name="dial_1" x="420" y="406">
+      <params/>
+      <attribs/>
+   </obj>
+   <obj type="disp/i" uuid="5e35fd0c62d81e70017289250cf28edd26e19e4a" name="i_2" x="770" y="462">
+      <params/>
+      <attribs/>
+   </obj>
+   <obj type="disp/i" uuid="5e35fd0c62d81e70017289250cf28edd26e19e4a" name="i_3" x="672" y="518">
+      <params/>
+      <attribs/>
+   </obj>
+   <obj type="disp/i" uuid="5e35fd0c62d81e70017289250cf28edd26e19e4a" name="i_4" x="714" y="518">
+      <params/>
+      <attribs/>
+   </obj>
+   <obj type="AkaiMidiMixReverbPlate" uuid="bebf5066-c775-498a-b873-9ad22a6cfa38" name="AkaiMidiMixReverbPlate_1" x="364" y="546">
+      <params>
+         <int32.hradio name="program" value="0">
+            <presets/>
+         </int32.hradio>
+         <bool32.mom name="save" value="0">
+            <presets/>
+         </bool32.mom>
+      </params>
+      <attribs/>
+   </obj>
+   <obj type="downmix8" uuid="79d704c9-9b46-430e-bf14-53d0ebba89d2" name="downmix8_1" x="1344" y="588">
+      <params/>
+      <attribs/>
+   </obj>
+   <obj type="modFdbkDelay" uuid="37e2fa21-a574-4976-98bb-2f9347702d30" name="modFdbkDelay_2" x="672" y="602">
+      <params/>
+      <attribs>
+         <spinner attributeName="width" value="1331"/>
+      </attribs>
+   </obj>
+   <obj type="delay3taps" uuid="3e728861-0bb9-4d08-a428-b1eb2014b77c" name="delay3taps_2" x="826" y="658">
+      <params>
+         <int32 name="width" value="6747">
+            <presets/>
+         </int32>
+         <int32 name="tap1" value="426">
+            <presets/>
+         </int32>
+         <int32 name="tap2" value="4758">
+            <presets/>
+         </int32>
+         <int32 name="tap3" value="3378">
+            <presets/>
+         </int32>
+      </params>
+      <attribs/>
+   </obj>
+   <obj type="diffusor_damper_tap2" uuid="bb56dda2-7971-4190-b8c3-c10a5981b3ed" name="diffusor_damper_tap2_3" x="1050" y="658">
+      <params>
+         <int32 name="tap1" value="3061">
+            <presets/>
+         </int32>
+         <int32 name="tap2" value="536">
+            <presets/>
+         </int32>
+      </params>
+      <attribs>
+         <spinner attributeName="chainSize" value="4253"/>
+      </attribs>
+   </obj>
+   <obj type="delay2taps" uuid="7a0a72ad-0ad2-4526-a0a8-66c24392721f" name="delay2taps_2" x="1204" y="658">
+      <params>
+         <int32 name="width" value="5061">
+            <presets/>
+         </int32>
+         <int32 name="tap1" value="3194">
+            <presets/>
+         </int32>
+         <int32 name="tap2" value="194">
+            <presets/>
+         </int32>
+         <int32 name="tap3" value="1611">
+            <presets/>
+         </int32>
+      </params>
+      <attribs/>
+   </obj>
+   <nets>
+      <net>
+         <source obj="Amp/Cab" outlet="left"/>
+         <dest obj="out_1" inlet="left"/>
+      </net>
+      <net>
+         <source obj="Amp/Cab" outlet="right"/>
+         <dest obj="out_1" inlet="right"/>
+      </net>
+      <net>
+         <source obj="in_1" outlet="left"/>
+         <dest obj="Distortion_1" inlet="in"/>
+      </net>
+      <net>
+         <source obj="long_time_decay_feedback" outlet="left"/>
+         <dest obj="stereo_highpass" inlet="left"/>
+      </net>
+      <net>
+         <source obj="long_time_decay_feedback" outlet="right"/>
+         <dest obj="stereo_highpass" inlet="right"/>
+      </net>
+      <net>
+         <source obj="stereo_highpass" outlet="left"/>
+         <dest obj="modFdbkDelay_1" inlet="in"/>
+      </net>
+      <net>
+         <source obj="stereo_highpass" outlet="right"/>
+         <dest obj="modFdbkDelay_2" inlet="in"/>
+      </net>
+      <net>
+         <source obj="predelay_slap" outlet="out"/>
+         <dest obj="input_diffusor_1" inlet="in"/>
+      </net>
+      <net>
+         <source obj="Amp/Cab" outlet="sendEfx"/>
+         <dest obj="predelay_slap" inlet="in"/>
+      </net>
+      <net>
+         <source obj="input_diffusor_1" outlet="out"/>
+         <dest obj="long_time_decay_feedback" inlet="mono"/>
+      </net>
+      <net>
+         <source obj="diffusor_damper_tap2_2" outlet="out"/>
+         <dest obj="delay2taps_1" inlet="in"/>
+      </net>
+      <net>
+         <source obj="diffusor_damper_tap2_2" outlet="tap1"/>
+         <dest obj="downmix" inlet="n_in6"/>
+      </net>
+      <net>
+         <source obj="diffusor_damper_tap2_2" outlet="tap2"/>
+         <dest obj="downmix8_1" inlet="n_in3"/>
+      </net>
+      <net>
+         <source obj="diffusor_damper_tap2_3" outlet="out"/>
+         <dest obj="delay2taps_2" inlet="in"/>
+      </net>
+      <net>
+         <source obj="diffusor_damper_tap2_3" outlet="tap1"/>
+         <dest obj="downmix" inlet="n_in3"/>
+      </net>
+      <net>
+         <source obj="diffusor_damper_tap2_3" outlet="tap2"/>
+         <dest obj="downmix8_1" inlet="n_in6"/>
+      </net>
+      <net>
+         <source obj="AkaiMidiMixReverbPlate_1" outlet="inputDiffusorFeedback"/>
+         <dest obj="input_diffusor_1" inlet="fdbk"/>
+      </net>
+      <net>
+         <source obj="AkaiMidiMixReverbPlate_1" outlet="inputDiffusorDamping"/>
+         <dest obj="input_diffusor_1" inlet="damping"/>
+      </net>
+      <net>
+         <source obj="Distortion_1" outlet="out"/>
+         <dest obj="Amp/Cab" inlet="in"/>
+      </net>
+      <net>
+         <source obj="AkaiMidiMixReverbPlate_1" outlet="modulationDamp"/>
+         <dest obj="modFdbkDelay_2" inlet="damper"/>
+         <dest obj="modFdbkDelay_1" inlet="damper"/>
+      </net>
+      <net>
+         <source obj="delay3taps_1" outlet="tap1"/>
+         <dest obj="downmix" inlet="p_in1"/>
+      </net>
+      <net>
+         <source obj="delay3taps_1" outlet="tap2"/>
+         <dest obj="downmix" inlet="p_in2"/>
+      </net>
+      <net>
+         <source obj="delay3taps_1" outlet="tap3"/>
+         <dest obj="downmix8_1" inlet="n_in5"/>
+      </net>
+      <net>
+         <source obj="delay3taps_2" outlet="tap1"/>
+         <dest obj="downmix8_1" inlet="p_in1"/>
+      </net>
+      <net>
+         <source obj="delay3taps_2" outlet="tap2"/>
+         <dest obj="downmix8_1" inlet="p_in2"/>
+      </net>
+      <net>
+         <source obj="delay3taps_2" outlet="tap3"/>
+         <dest obj="downmix" inlet="n_in5"/>
+      </net>
+      <net>
+         <source obj="delay2taps_1" outlet="out"/>
+         <dest obj="long_time_decay_feedback" inlet="right"/>
+      </net>
+      <net>
+         <source obj="delay2taps_1" outlet="tap1"/>
+         <dest obj="downmix" inlet="n_in7"/>
+      </net>
+      <net>
+         <source obj="delay2taps_1" outlet="tap2"/>
+         <dest obj="downmix8_1" inlet="p_in4"/>
+      </net>
+      <net>
+         <source obj="delay2taps_2" outlet="out"/>
+         <dest obj="long_time_decay_feedback" inlet="left"/>
+      </net>
+      <net>
+         <source obj="delay2taps_2" outlet="tap1"/>
+         <dest obj="downmix" inlet="p_in4"/>
+      </net>
+      <net>
+         <source obj="delay2taps_2" outlet="tap2"/>
+         <dest obj="downmix8_1" inlet="n_in7"/>
+      </net>
+      <net>
+         <source obj="delay3taps_2" outlet="out"/>
+         <dest obj="diffusor_damper_tap2_3" inlet="in"/>
+      </net>
+      <net>
+         <source obj="delay3taps_1" outlet="out"/>
+         <dest obj="diffusor_damper_tap2_2" inlet="in"/>
+      </net>
+      <net>
+         <source obj="modFdbkDelay_1" outlet="out"/>
+         <dest obj="delay3taps_1" inlet="in"/>
+         <dest obj="Amp/Cab" inlet="returnEfxLeft"/>
+      </net>
+      <net>
+         <source obj="modFdbkDelay_2" outlet="out"/>
+         <dest obj="delay3taps_2" inlet="in"/>
+         <dest obj="Amp/Cab" inlet="returnEfxRight"/>
+      </net>
+      <net>
+         <source obj="delay2taps_2" outlet="tap3"/>
+         <dest obj="downmix8_1" inlet="p_in8"/>
+      </net>
+      <net>
+         <source obj="delay2taps_1" outlet="tap3"/>
+         <dest obj="downmix" inlet="p_in8"/>
+      </net>
+      <net>
+         <source obj="AkaiMidiMixReverbPlate_1" outlet="modulationFeedback"/>
+         <dest obj="modFdbkDelay_1" inlet="fdbk"/>
+         <dest obj="modFdbkDelay_2" inlet="fdbk"/>
+         <dest obj="dial_1" inlet="in"/>
+      </net>
+      <net>
+         <source obj="AkaiMidiMixReverbPlate_1" outlet="modulationDepth"/>
+         <dest obj="modFdbkDelay_2" inlet="moddepth"/>
+         <dest obj="modFdbkDelay_1" inlet="moddepth"/>
+         <dest obj="i_4" inlet="in"/>
+      </net>
+      <net>
+         <source obj="AkaiMidiMixReverbPlate_1" outlet="tankFeedback"/>
+         <dest obj="long_time_decay_feedback" inlet="feedback"/>
+      </net>
+      <net>
+         <source obj="AkaiMidiMixReverbPlate_1" outlet="predelayMsecs"/>
+         <dest obj="predelay_slap" inlet="msecs"/>
+         <dest obj="i_1" inlet="in"/>
+      </net>
+      <net>
+         <source obj="AkaiMidiMixReverbPlate_1" outlet="modulationTime"/>
+         <dest obj="modFdbkDelay_1" inlet="modulationTime"/>
+         <dest obj="modFdbkDelay_2" inlet="modulationTime"/>
+         <dest obj="i_3" inlet="in"/>
+      </net>
+      <net>
+         <source obj="AkaiMidiMixReverbPlate_1" outlet="diffusorFeedback"/>
+         <dest obj="diffusor_damper_tap2_2" inlet="fdbk"/>
+         <dest obj="diffusor_damper_tap2_3" inlet="fdbk"/>
+      </net>
+      <net>
+         <source obj="AkaiMidiMixReverbPlate_1" outlet="diffusorDamping"/>
+         <dest obj="diffusor_damper_tap2_2" inlet="damping"/>
+         <dest obj="diffusor_damper_tap2_3" inlet="damping"/>
+      </net>
+   </nets>
+   <settings>
+      <subpatchmode>no</subpatchmode>
+      <NPresetEntries>30</NPresetEntries>
+   </settings>
+   <notes><![CDATA[]]></notes>
+   <windowPos>
+      <x>809</x>
+      <y>111</y>
+      <width>1711</width>
+      <height>988</height>
+   </windowPos>
+</patch>

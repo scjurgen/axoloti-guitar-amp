@@ -1,0 +1,208 @@
+<objdefs appVersion="2.0.0">
+   <obj.normal id="tape_delay" uuid="de7d06cb-603e-45d7-a676-473f2c400899">
+      <sDescription>samplesize variant combfilter with 2 taps and damper on feedback</sDescription>
+      <author>Jürgen Schwietering</author>
+      <license>MIT</license>
+      <inlets>
+         <frac32buffer name="in" description="in"/>
+         <frac32.bipolar name="fdbk" description=""/>
+         <frac32.positive name="damping" description=""/>
+      </inlets>
+      <outlets>
+         <frac32buffer name="out" description="out"/>
+      </outlets>
+      <displays/>
+      <params>
+         <int32 name="bpm" description="">
+            <MinValue i="50"/>
+            <MaxValue i="200"/>
+         </int32>
+         <int32 name="beats" description="">
+            <MinValue i="1"/>
+            <MaxValue i="8"/>
+         </int32>
+         <frac32.u.map.gain name="levelDry" description="">
+            <DefaultValue v="0.0"/>
+         </frac32.u.map.gain>
+         <frac32.u.map.gain name="levelWet" description="">
+            <DefaultValue v="0.0"/>
+         </frac32.u.map.gain>
+         <int32 name="tap1">
+            <MinValue i="0"/>
+            <MaxValue i="64"/>
+         </int32>
+         <frac32.u.map.gain name="levelTap1" description="">
+            <DefaultValue v="0.0"/>
+         </frac32.u.map.gain>
+         <int32 name="tap2">
+            <MinValue i="0"/>
+            <MaxValue i="64"/>
+         </int32>
+         <frac32.u.map.gain name="levelTap2" description="">
+            <DefaultValue v="0.0"/>
+         </frac32.u.map.gain>
+      </params>
+      <attribs>
+         <spinner name="chainSizeMsecs" MinValue="100" MaxValue="8000" DefaultValue="1000"/>
+      </attribs>
+      <file-depends/>
+      <includes/>
+      <depends/>
+      <modules/>
+      <code.declaration><![CDATA[class FeedbackRing
+{
+public:
+	FeedbackRing()
+	: m_size(0)
+	, m_head(0)
+	, m_feedback(0)
+	, prev(0)
+	, offset(0)
+	{
+	}
+
+
+	void init(int sizeMsecs)
+	{
+		int size = 48000*sizeMsecs/1000;
+		m_buffer = (int32_t *) sdram_malloc(size*sizeof(int32_t));
+		LogTextMessage("tapedelay mem: %d", size);
+		m_maxSize = size;
+		m_size = size;
+		memset(m_buffer, 0, sizeof(int32_t)*m_size);
+		m_head = 0;
+		prev = 0;
+		offset = 0;
+	}
+
+	void feedBack(int32_t gain)
+	{
+		m_feedback = gain;
+	}
+
+	void setDamping(int32_t damping)
+	{
+		m_damper = damping;
+	}
+
+
+
+	void setBpmBasedSize(int32_t bpm, int32_t beats)
+	{
+		m_size = (48000*60/bpm)*beats;
+		if (m_size >= m_maxSize)
+			m_size = m_maxSize;
+	}
+
+	
+	int32_t getTap(int32_t rel_position)
+	{
+		int h=m_head-rel_position+m_size;
+		if (h >= m_size)
+			h-=m_size;
+		if (h >= m_size)
+			h-=m_size;
+		return m_buffer[h];
+	}
+
+	void setTapPos(int idx,int32_t value)
+	{
+		if (value != 0)
+			tapPos[idx] = value*m_size/64;
+		else
+			tapPos[idx] = 0;
+	}
+
+	
+     int32_t damper(int32_t in)
+     {
+     	int32_t delta = prev-in;
+		offset = ___SMMLA(m_damper<<3, offset<<2, delta);
+		prev = in;
+		return offset+in;	
+     }
+	
+	int32_t update(const int32buffer in, int32buffer &out)
+	{
+		
+		int head = m_head;
+		for (int i=0; i < BUFSIZE; ++i)
+		{
+			int32_t outBuffer = m_buffer[m_head];
+			int32_t writeBack = damper(___SMMLA(outBuffer<<2, m_feedback<<3, in[i]));
+			m_buffer[m_head++] = writeBack;
+			if (m_head >= m_size)
+				m_head = 0;
+
+			int32_t retValue =  ___SMMUL(in[i]<<1, m_dryLevel);
+			
+			retValue += ___SMMUL(outBuffer<<1, level[0]);
+			if (tapPos[0])
+			{
+				retValue += ___SMMUL(getTap(tapPos[0])<<1, level[1]);
+			}
+			if (tapPos[1])
+			{
+				retValue += ___SMMUL(getTap(tapPos[1])<<1, level[2]);
+			}
+			out[i] = retValue;
+			
+		}
+	}
+	void setDryLevel(int32_t dryLevel)
+	{
+		m_dryLevel = dryLevel;
+	}
+
+	void setLevel(int idx, int32_t value)
+	{
+		if (value != level[idx])
+		{
+			int32_t res = ___SMMLA(value, (1<<27)<<1, 0);
+			LogTextMessage("%x %x 1=%x", value, res+1, (1<<27));
+		}
+		level[idx] = value;
+	}
+
+private:
+	int32_t m_size;
+	int32_t m_maxSize;
+	int32_t m_head;
+	int32_t m_feedback;
+	int32_t *m_buffer;
+     int32_t m_damper;
+	int32_t prev;
+	int32_t offset;
+	int32_t m_dryLevel;
+	int32_t level[3];
+	int32_t tapPos[2];
+};
+
+FeedbackRing rng;]]></code.declaration>
+      <code.init><![CDATA[rng.init(attr_chainSizeMsecs);]]></code.init>
+      <code.krate><![CDATA[int32_t oldFdbk=123;
+
+if (oldFdbk!=inlet_fdbk)
+{
+	oldFdbk = inlet_fdbk;
+	rng.feedBack(oldFdbk);
+	//LogTextMessage("fdbk: %x", oldFdbk);
+}
+
+static int kCnt = 0;
+if (kCnt++ > 500)
+{
+	kCnt = 0;
+	rng.setBpmBasedSize(param_bpm, param_beats);
+	rng.setTapPos(0,param_tap1);
+	rng.setTapPos(1,param_tap2);
+	rng.setDryLevel(param_levelDry);
+	rng.setLevel(0,param_levelWet);
+	rng.setLevel(1,param_levelTap1);
+	rng.setLevel(2,param_levelTap2);
+	
+	rng.setDamping(inlet_damping);
+}
+rng.update(inlet_in, outlet_out);]]></code.krate>
+   </obj.normal>
+</objdefs>

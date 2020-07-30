@@ -1,0 +1,85 @@
+<objdefs appVersion="2.0.0">
+   <obj.normal id="modFdbkDelay" uuid="37e2fa21-a574-4976-98bb-2f9347702d30">
+      <author>Jürgen Schwietering</author>
+      <license>BSD</license>
+      <helpPatch>fdbkcomb.axh</helpPatch>
+      <inlets>
+         <frac32buffer name="in" description="in"/>
+         <frac32.bipolar name="fdbk"/>
+         <frac32.positive name="damper" description=""/>
+         <int32 name="modulationTime" description=""/>
+         <int32 name="moddepth" description=""/>
+      </inlets>
+      <outlets>
+         <frac32buffer name="out" description="out"/>
+      </outlets>
+      <displays/>
+      <params/>
+      <attribs>
+         <spinner name="width" description="" MinValue="500" MaxValue="4000" DefaultValue="1217"/>
+      </attribs>
+      <file-depends/>
+      <includes/>
+      <depends/>
+      <modules/>
+      <code.declaration><![CDATA[int32_t *d;
+int32_t head=0;
+int32_t tail=2;
+int32_t currentWidth;
+int32_t currentPhase=0;
+int32_t krateStep=0;
+int32_t damper;
+int32_t prev;
+int32_t offset;]]></code.declaration>
+      <code.init><![CDATA[static int32_t sram_buffer1[attr_width];
+d = sram_buffer1;
+head = 0;]]></code.init>
+      <code.krate><![CDATA[krateStep++;
+
+if (krateStep < inlet_modulationTime)
+{
+	currentPhase=inlet_moddepth*krateStep/inlet_modulationTime;
+}
+else if (krateStep < inlet_modulationTime*2)
+{
+	currentPhase=inlet_moddepth*(inlet_modulationTime*2-krateStep)/inlet_modulationTime;
+}
+else
+{
+	krateStep = 0;
+}
+
+damper = inlet_damper;
+
+int32_t fdbk = inlet_fdbk<<3; 
+
+tail = head+2+currentPhase;
+
+if (tail>= attr_width)
+	tail-=attr_width;]]></code.krate>
+      <code.srate><![CDATA[/*
+  out =  delay+in*factor
+  delayIn = delay*factor + in
+ */
+
+outlet_out = ___SMMLA(-inlet_in<<2, fdbk, d[tail]);
+int32_t valueD = ___SMMLA(d[tail]<<2, fdbk, inlet_in);
+
+tail++;
+if (tail >= attr_width)
+{
+	tail = 0;
+}
+
+int32_t delta = prev-valueD;
+offset =___SMMUL(damper<<3,offset<<2)+delta;
+prev = valueD;
+
+d[head++] = offset+prev;
+
+if (head >= attr_width)
+{
+	head = 0;
+}]]></code.srate>
+   </obj.normal>
+</objdefs>

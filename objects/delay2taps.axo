@@ -1,0 +1,76 @@
+<objdefs appVersion="2.0.0">
+   <obj.normal id="delay2taps" uuid="86aeaaaa-6b8d-45b4-9887-6f68da20c8c5">
+      <author>Jürgen Schwietering</author>
+      <license>BSD</license>
+      <helpPatch>fdbkcomb.axh</helpPatch>
+      <inlets>
+         <frac32buffer name="in" description="in"/>
+      </inlets>
+      <outlets>
+         <frac32buffer name="out" description="out"/>
+         <frac32buffer name="tap1"/>
+         <frac32buffer name="tap2"/>
+         <frac32buffer name="tap3"/>
+      </outlets>
+      <displays/>
+      <params>
+         <int32 name="width" description="delaywidth">
+            <MinValue i="5000"/>
+            <MaxValue i="8000"/>
+         </int32>
+         <int32 name="tap1">
+            <MinValue i="0"/>
+            <MaxValue i="8000"/>
+         </int32>
+         <int32 name="tap2">
+            <MinValue i="0"/>
+            <MaxValue i="8000"/>
+         </int32>
+         <int32 name="tap3">
+            <MinValue i="0"/>
+            <MaxValue i="8000"/>
+         </int32>
+      </params>
+      <attribs/>
+      <file-depends/>
+      <includes/>
+      <depends/>
+      <modules/>
+      <code.declaration><![CDATA[const int32_t maxSize = 8192;
+int32_t *d;
+int32_t head;
+int32_t tap1, tap2, tap3;]]></code.declaration>
+      <code.init><![CDATA[d=(int32_t *) sdram_malloc(sizeof(int32_t)*maxSize);
+memset(d,0, sizeof(int32_t)*maxSize);
+
+head = 0;
+tap1 = 0;
+tap2 = 0;
+tap3 = 0;]]></code.init>
+      <code.srate><![CDATA[outlet_out = d[head];
+d[head++] = inlet_in;
+
+if (head >= param_width)
+{
+	head = 0;
+	tap1 = param_tap1;
+	tap2 = param_tap2;
+	tap3 = param_tap3;
+}
+
+outlet_tap1 = d[tap1];
+tap1++;
+if (tap1 >= param_width)
+	tap1 = 0;
+
+outlet_tap2 = d[tap2];
+tap2++;
+if (tap2 >= param_width)
+	tap2 = 0;
+
+outlet_tap3 = d[tap3];
+tap3++;
+if (tap3 >= param_width)
+	tap3 = 0;]]></code.srate>
+   </obj.normal>
+</objdefs>
