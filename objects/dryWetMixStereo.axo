@@ -1,0 +1,36 @@
+<objdefs appVersion="2.0.0">
+   <obj.normal id="dryWetMixStereo" uuid="067c60e4-7ed2-4574-a6d2-22bfdafcb645" sha="921aefdda41b92a27cc93c53b5154554d0ce6d3b">
+      <upgradeSha>f14eeeeb6df032a7e072e970956c20613eb267f1</upgradeSha>
+      <sDescription>left Right Balance (or dry wet mixer)</sDescription>
+      <author>Jürgen Schwietering</author>
+      <license>MIT</license>
+      <inlets>
+         <frac32buffer name="left" description="left channel dry"/>
+         <frac32buffer name="right" description="right channel dry"/>
+         <frac32buffer name="wetleft" description=""/>
+         <frac32buffer name="wetright" description=""/>
+      </inlets>
+      <outlets>
+         <frac32buffer name="left" description="mix out left"/>
+         <frac32buffer name="right" description="mix out right"/>
+      </outlets>
+      <displays/>
+      <params>
+         <frac32.u.map.gain name="balance" description="" noLabel="true">
+            <DefaultValue v="0.0"/>
+         </frac32.u.map.gain>
+      </params>
+      <attribs/>
+      <file-depends/>
+      <includes/>
+      <depends/>
+      <modules/>
+      <code.srate><![CDATA[int32_t v = ___SMMUL(inlet_left, 0x7fffffff-param_balance);
+v = ___SMMLA(inlet_wetleft, param_balance, v);
+outlet_left=  __SSAT(v<<1,28);
+
+v = ___SMMUL(inlet_right, 0x7fffffff-param_balance);
+v = ___SMMLA(inlet_wetright, param_balance, v);
+outlet_right=  __SSAT(v<<1,28);]]></code.srate>
+   </obj.normal>
+</objdefs>

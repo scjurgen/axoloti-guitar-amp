@@ -6,9 +6,8 @@
          <frac32buffer name="inRight"/>
       </inlets>
       <outlets>
-         <frac32buffer name="outLeft"/>
+         <frac32buffer name="outLeft" description="Left Mix with Dry and wet"/>
          <frac32buffer name="outRight"/>
-         <frac32 name="o1" description=""/>
       </outlets>
       <displays/>
       <params>
@@ -78,12 +77,17 @@ if (krateCount==3000)
 	oDelay[1].setPitch((int32_t)param_pitchRatio+(int32_t)10000);
 	oDelay[0].setFeedback(param_feedback);
 	oDelay[1].setFeedback(param_feedback);
-	oDelay[0].setMix(param_
 }]]></code.krate>
-      <code.srate><![CDATA[int32_t value = float_to_q27(oDelay[0].step(q27_to_float(inlet_inLeft)));
-outlet_outLeft = value;
+      <code.srate><![CDATA[int32_t value = oDelay[0].step(inlet_inLeft);
 
-value = float_to_q27(oDelay[1].step(q27_to_float(inlet_inRight)));
-outlet_outRight = value;]]></code.srate>
+int32_t v = ___SMMUL(inlet_inLeft, 0x7fffffff-param_dryWet);
+v = ___SMMLA(value, param_dryWet, v);
+outlet_outLeft=  __SSAT(v<<1,28);
+
+value = oDelay[1].step(inlet_inRight);
+
+v = ___SMMUL(inlet_inRight, 0x7fffffff-param_dryWet);
+v = ___SMMLA(value, param_dryWet, v);
+outlet_outRight=  __SSAT(v<<1,28);]]></code.srate>
    </obj.normal>
 </objdefs>

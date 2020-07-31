@@ -1,0 +1,75 @@
+<objdefs appVersion="2.0.0">
+   <obj.normal id="DeluxeVerbResponse" uuid="3c4745ad-07f7-4ada-b37b-8c67fe96ce72">
+      <license>GPL</license>
+      <inlets>
+         <frac32buffer name="in" description=""/>
+      </inlets>
+      <outlets>
+         <frac32buffer name="out" description=""/>
+      </outlets>
+      <displays/>
+      <params>
+         <bool32.tgl name="onoff" description="onoff"/>
+         <frac32.u.map.gain name="level" description="">
+            <DefaultValue v="0.0"/>
+         </frac32.u.map.gain>
+         <frac32.s.map.ratio name="gainLow" description="">
+            <DefaultValue v="0.0"/>
+         </frac32.s.map.ratio>
+         <frac32.s.map.ratio name="gainMid" description="">
+            <DefaultValue v="0.0"/>
+         </frac32.s.map.ratio>
+         <frac32.s.map.ratio name="gainHigh" description="">
+            <DefaultValue v="0.0"/>
+         </frac32.s.map.ratio>
+      </params>
+      <attribs/>
+      <file-depends/>
+      <includes>
+         <include>/Users/jurgenschwietering/Desktop/axoloti-amp/FilterChain.h</include>
+      </includes>
+      <depends/>
+      <modules/>
+      <code.declaration><![CDATA[#define SAMPLE_RATE 48000
+
+#define M_PI 3.1415926535
+
+FilterSet<10> initial ={ // dt = 1.755837 - 'deluxe-vrb-norm-master5 Left 1x12 Right 2x12.right.csv'
+0.717758, 13, {
+    {LoPass, 2, EQ_NONE, 2660.5, 0, 4.761},	//  0 
+    {LoPass, 2, EQ_NONE, 7525.04, 0, 13.689},	//  1 
+    {LoPass, 2, EQ_NONE, 3986.25, 0, 5.625},	//  2 
+    {HiPass, 1, EQ_NONE, 48.493, 0, 1.089},	//  3 
+    {LoShelf, 1, EQ_NONE, 822.025, -0.8, 5.776},	//  4 
+    {HiShelf, 1, EQ_NONE, 5747.01, 2.6, 38.025},	//  5 
+    {Peak, 1, EQ_NONE, 4832.64, 2.44, 0.4},	//  6 
+    {Peak, 1, EQ_NONE, 1280, -1.4, 0.9},	//  7 
+    {Notch, 1, EQ_NONE, 3103.55, 0, 0.5},	//  8 
+    {Peak, 1, EQ_NONE, 71.2719, 4.5, 9.604},	//  9 
+
+        {LoShelf, 1, EQ_LOW, 120, 0.0, 0.707},	//  9
+    {Peak, 1, EQ_MID, 500, 0.0, 0.707},	//  10
+    {HiShelf, 1, EQ_HIGH, 3000, 0.0, 0.707},	//  11 
+}};
+
+FilterChain<13,0> ampChain;]]></code.declaration>
+      <code.init><![CDATA[ampChain.setParams(initial);]]></code.init>
+      <code.krate><![CDATA[static int krateCount=2990;
+if (krateCount++ >= 1000)
+{
+	ampChain.setGain(q27_to_float(param_gainLow), q27_to_float(param_gainMid), q27_to_float(param_gainHigh));
+	krateCount = 0;
+//	krate30(parameters);
+}
+
+
+int32buffer result;
+int32buffer feed;
+int32buffer dry;
+
+if (param_onoff)
+	ampChain.dsp(inlet_in, outlet_out);
+else
+	memcpy(outlet_out, inlet_in, sizeof(dry));]]></code.krate>
+   </obj.normal>
+</objdefs>

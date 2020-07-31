@@ -248,7 +248,7 @@ public:
         }
     }
 
-    void setGain(float low, float mid, float high)
+    void setEQ(float low, float mid, float high)
     {
         float gains[3] = {low,mid, high};
         for (int c=0; c < 3; ++c)
@@ -303,7 +303,6 @@ public:
     void dsp(const int32buffer in, int32buffer &out)
     {
         float buffer[BUFSIZE];
-        float tbuffer[BUFSIZE];
         for (int i = 0; i < BUFSIZE; ++i)
         {
             buffer[i] = q27_to_float(in[i]);

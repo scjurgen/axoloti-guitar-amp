@@ -41,7 +41,7 @@ int32_t *d;
 int32_t head;
 int32_t tap1, tap2, tap3;]]></code.declaration>
       <code.init><![CDATA[d=(int32_t *) sdram_malloc(sizeof(int32_t)*maxSize);
-memset(d, sizeof(int32_t)*maxSize);
+memset(d, 0, sizeof(int32_t)*maxSize);
 head = 0;
 tap1 = 0;
 tap2 = 0;

@@ -1,0 +1,150 @@
+<objdefs appVersion="2.0.0">
+   <obj.normal id="AmpCabSendReturnEFX" uuid="3504cc76-bd91-475e-b7b6-bb2ac82624d3">
+      <license>GPL</license>
+      <inlets>
+         <frac32buffer name="in" description=""/>
+         <frac32buffer name="returnEfxLeft" description=""/>
+         <frac32buffer name="returnEfxRight" description=""/>
+      </inlets>
+      <outlets>
+         <frac32buffer name="left" description=""/>
+         <frac32buffer name="right" description=""/>
+         <frac32buffer name="sendEfx" description=""/>
+      </outlets>
+      <displays/>
+      <params>
+         <bool32.tgl name="onoff" description="onoff"/>
+         <frac32.u.map.gain name="level" description="">
+            <DefaultValue v="0.0"/>
+         </frac32.u.map.gain>
+         <frac32.u.map.ratio name="efxMix" description="">
+            <DefaultValue v="0.0"/>
+         </frac32.u.map.ratio>
+         <frac32.s.map.ratio name="gainLow" description="">
+            <DefaultValue v="0.0"/>
+         </frac32.s.map.ratio>
+         <frac32.s.map.ratio name="gainMid" description="">
+            <DefaultValue v="0.0"/>
+         </frac32.s.map.ratio>
+         <frac32.s.map.ratio name="gainHigh" description="">
+            <DefaultValue v="0.0"/>
+         </frac32.s.map.ratio>
+      </params>
+      <attribs/>
+      <file-depends/>
+      <includes>
+         <include>/Users/jurgenschwietering/Desktop/axoloti-amp/FilterChain.h</include>
+      </includes>
+      <depends/>
+      <modules/>
+      <code.declaration><![CDATA[#define SAMPLE_RATE 48000
+
+#define M_PI 3.1415926535
+
+
+FilterSet<12> initialSetAmp ={ // dt = 0.034968 - 'amps/DeluxeVerbVib-InputDrive1.csv'
+1.5, 12, {
+    {LoShelf, 2, EQ_NONE, 71.2719, 3.06, 1.58},	//  0 
+    {HiShelf, 1, EQ_NONE, 5529.91, 6.72, 1.36},	//  1 
+    {HiPass, 2, EQ_NONE, 48.493, 0, 0.441},	//  2 
+    {LoPass, 1, EQ_NONE, 16255, 0, 1.2},	//  3 
+    {Peak, 2, EQ_NONE, 63.496, 3.24, 19.881},	//  4 
+    {Peak, 1, EQ_NONE, 8446.57, 5.62, 0.32},	//  5 
+    {Peak, 1, EQ_NONE, 320, -8.2, 0.46},	//  6 
+    {Peak, 1, EQ_NONE, 517.844, -5.56, 0.77},	//  7 
+    {Peak, 1, EQ_NONE, 1055.82, -4.14, 0.5},	//  8 
+    {LoShelf, 1, EQ_LOW, 120, 0.0, 0.707},	//  9
+    {Peak, 1, EQ_MID, 500, 0.0, 0.707},	//  10
+    {HiShelf, 1, EQ_HIGH, 3000, 0.0, 0.707},	//  11 
+}};
+/*
+FilterSet<12> initialSetCab ={ // dt = 0.791910 - 'cabs/DeluxeVerbMix.csv'
+0.6, 12, {
+    {LoPass, 2, EQ_NONE, 8446.57, 0, 0.196},	//  0 
+    {LoPass, 2, EQ_NONE, 5000.57, 0, 0.707},	//  0 
+    {HiPass, 1, EQ_NONE, 68.5795, 0, 1.444},	//  1 
+    {LoShelf, 1, EQ_NONE, 339.028, 0.62, 38.416},	//  2 
+    {HiShelf, 1, EQ_NONE, 538.174, 5.16, 0.289},	//  3 
+    {Peak, 1, EQ_NONE, 718.376, -9.92, 34.969},	//  4 
+    {Peak, 1, EQ_NONE, 2764.95, 8.84, 0.841},	//  5 
+    {Peak, 1, EQ_NONE, 124.57, -3.26, 4.9},	//  6 
+    {Notch, 1, EQ_NONE, 1676.01, 0, 7.569},	//  7 
+    {Peak, 1, EQ_NONE, 411.013, 11.42, 35.344},	//  8 
+    {Peak, 1, EQ_NONE, 1208.16, -9.72, 28.224},	//  9 
+    {Notch, 1, EQ_NONE, 3163.89, 0, 5.625},	// 10 
+}};
+*/
+FilterSet<10> initialSetCab ={ // dt = 1.100675 - 'cabs/DeluxeVerbMix.csv'
+1.08318, 10, {
+    {LoPass, 2, EQ_NONE, 3620.39, 0, 1.125},	//  0 
+    {LoPass, 2, EQ_NONE, 4561.4, 0, 39.601},	//  1 
+    {HiPass, 1, EQ_NONE, 53.3936, 0, 1.089},	//  2 
+//    {LoShelf, 1, EQ_NONE, 209.502, -0.84, 3.025},	//  3 
+//    {HiShelf, 1, EQ_NONE, 1881.26, 0.94, 10.609},	//  4 
+    {Peak, 1, EQ_NONE, 1304.88, 2.46, 16.9},	//  5 
+    //{Peak, 1, EQ_NONE, 3690.77, 0.7, 0.025},	//  6 
+    //{Peak, 1, EQ_NONE, 4142.75, 1, 3.481},	//  7 
+    {Notch, 1, EQ_NONE, 2986.31, 0, 21.316},	//  8 
+    {Peak, 1, EQ_NONE, 470.315, 2.34, 25.6},	//  9 
+    {Peak, 1, EQ_NONE, 704.676, -2.7, 13.456},	// 10 
+    {Notch, 1, EQ_NONE, 4389.09, 0, 0.5},	// 11 
+    {Notch, 1, EQ_NONE, 1185.12, 0, 28.561},	// 12 
+    {Peak, 1, EQ_NONE, 1015.94, 2.26, 5.929},	// 13 
+}};
+
+FilterChain<12,0> ampChain;
+FilterChain<10,0> cabChainLeft;
+FilterChain<10,0> cabChainRight;]]></code.declaration>
+      <code.init><![CDATA[ampChain.setParams(initialSetAmp);
+cabChainLeft.setParams(initialSetCab);
+cabChainRight.setParams(initialSetCab);]]></code.init>
+      <code.krate><![CDATA[static int krateCount=2990;
+if (krateCount++ >= 1000)
+{
+	ampChain.setGain(q27_to_float(param_gainLow), q27_to_float(param_gainMid), q27_to_float(param_gainHigh));
+	krateCount = 0;
+//	krate30(parameters);
+}
+
+
+int32buffer result;
+int32buffer feed;
+int32buffer dry;
+
+if (param_onoff)
+	ampChain.dsp(inlet_in, dry);
+else
+	memcpy(dry, inlet_in, sizeof(dry));
+memcpy(outlet_sendEfx, dry, sizeof(dry));
+
+for (int s=0; s < 16; ++s)
+{
+	int32_t accum = ___SMMUL(inlet_returnEfxLeft[s]<<3, param_efxMix<<3);
+	feed[s] =  dry[s] + accum;
+}
+if (param_onoff)
+	cabChainLeft.dsp(feed, result);
+else
+	memcpy(result, feed, sizeof(dry));
+
+for (int s=0; s < 16; ++s)
+{
+	outlet_left[s] =___SMMUL(param_level,result[s]<<2);
+}
+
+for (int s=0; s < 16; ++s)
+{
+	int32_t accum = ___SMMUL(inlet_returnEfxRight[s]<<3, param_efxMix<<3);
+	feed[s] =  dry[s] + accum;
+}
+if (param_onoff)
+	cabChainRight.dsp(feed, result);
+else
+	memcpy(result, feed, sizeof(dry));
+
+for (int s=0; s < 16; ++s)
+{
+	outlet_right[s] =___SMMUL(param_level,result[s]<<3);
+}]]></code.krate>
+   </obj.normal>
+</objdefs>

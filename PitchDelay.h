@@ -222,6 +222,11 @@ public:
         resetFadeTimeAdjusted();
     }
 
+    void setMix(int32_t mix)
+    {
+        m_mix =  mix;
+    }
+
     Q16 m_fadeInPos; // q16 (for now)
     Q16 m_fadeOutPos;
     Q16 m_advance;
