@@ -184,6 +184,12 @@ public:
             }
         }
         advanceFade(m_fadeInPos);
+
+        int32_t delta = m_prev-valout;
+        m_offset =___SMMUL(m_damping<<3,m_offset<<2)+delta;
+        m_prev = valout;
+        valout += m_offset;
+
         m_buffer[m_head++] = ___SMMLA(valout << 2, m_fdbkGain << 3, in);;
         if (m_head >= m_size)
         {
@@ -203,7 +209,7 @@ public:
         }
         else
             m_reverse = false;
-        m_advance = ratio >> (27 - SHIFTADVANCE-1);
+        m_advance = ratio >> (27 - SHIFTADVANCE);
         resetFadeTimeAdjusted();
     }
 
@@ -220,6 +226,11 @@ public:
             m_reverse = false;
         m_advance = (int32_t)(ratio*(1<<SHIFTADVANCE));
         resetFadeTimeAdjusted();
+    }
+
+    void setDamping(uint32_t damping)
+    {
+        m_damping = damping;
     }
 
     void setMix(int32_t mix)
@@ -243,6 +254,8 @@ protected:
     uint32_t m_fadeCount;
     uint32_t m_fadeStep;
     uint32_t m_mix;
+    uint32_t m_prev, m_offset;
+    int32_t m_damping;
     bool m_fade;
     bool m_reverse;
 };

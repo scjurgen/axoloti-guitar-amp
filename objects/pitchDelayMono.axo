@@ -53,7 +53,7 @@
       <includes/>
       <depends/>
       <modules/>
-      <code.declaration><![CDATA[#include "/Users/scjurgen/Desktop/axoloti-amp/PitchDelay.h"
+      <code.declaration><![CDATA[#include "/Users/scjurgen/Desktop/axoloti-guitar-amp/PitchDelay.h"
 
 PitchDelay oDelay[1];
 

@@ -1,9 +1,14 @@
 <objdefs appVersion="2.0.0">
-   <obj.normal id="pitchDelay" uuid="cf188521-96b1-4701-98ef-3a12a4b83ead">
+   <obj.normal id="pitchDelay" uuid="86507f41-47cb-4e5c-bacc-7e4170d94f3a">
       <license>GPL</license>
       <inlets>
          <frac32buffer name="inLeft"/>
          <frac32buffer name="inRight"/>
+         <frac32.positive name="feedback" description=""/>
+         <frac32.positive name="damping" description=""/>
+         <frac32.positive name="ratioLeft" description=""/>
+         <frac32.positive name="ratioRight" description=""/>
+         <frac32.positive name="drywet" description=""/>
       </inlets>
       <outlets>
          <frac32buffer name="outLeft" description="Left Mix with Dry and wet"/>
@@ -11,17 +16,14 @@
       </outlets>
       <displays/>
       <params>
-         <frac32.u.map.ratio name="feedback">
-            <DefaultValue v="0.2"/>
-         </frac32.u.map.ratio>
-         <int32 name="fadeSize">
+         <int32 name="fadeSize" noLabel="true">
             <MinValue i="3"/>
             <MaxValue i="16"/>
          </int32>
-         <frac32.s.map name="pitchRatio">
+         <frac32.s.map name="p1" description="">
             <DefaultValue v="0.0"/>
          </frac32.s.map>
-         <frac32.u.map.ratio name="dryWet" description="">
+         <frac32.u.map.ratio name="fdbk" description="">
             <DefaultValue v="0.0"/>
          </frac32.u.map.ratio>
       </params>
@@ -55,7 +57,7 @@
       <includes/>
       <depends/>
       <modules/>
-      <code.declaration><![CDATA[#include "/Users/scjurgen/Desktop/axoloti-amp/PitchDelay.h"
+      <code.declaration><![CDATA[#include "/Users/scjurgen/Desktop/axoloti-guitar-amp/PitchDelay.h"
 
 PitchDelay oDelay[2];
 
@@ -73,21 +75,25 @@ if (krateCount==3000)
 	krateCount = 0;
 	oDelay[0].setFadeTime(param_fadeSize);
 	oDelay[1].setFadeTime(param_fadeSize);
-	oDelay[0].setPitch((int32_t)param_pitchRatio);
-	oDelay[1].setPitch((int32_t)param_pitchRatio+(int32_t)10000);
-	oDelay[0].setFeedback(param_feedback);
-	oDelay[1].setFeedback(param_feedback);
+	oDelay[0].setPitch(inlet_ratioLeft);
+	oDelay[1].setPitch(inlet_ratioRight);
+	oDelay[0].setFeedback(inlet_feedback);
+	oDelay[1].setFeedback(inlet_feedback);
+//	oDelay[0].setFeedback(param_fdbk);
+//	oDelay[1].setFeedback(param_fdbk);
+	oDelay[0].setDamping(inlet_damping);
+	oDelay[1].setDamping(inlet_damping);
 }]]></code.krate>
       <code.srate><![CDATA[int32_t value = oDelay[0].step(inlet_inLeft);
-
-int32_t v = ___SMMUL(inlet_inLeft, 0x7fffffff-param_dryWet);
-v = ___SMMLA(value, param_dryWet, v);
+//outlet_outLeft = value;
+int32_t v = ___SMMUL(inlet_inLeft, (0x7ffffff-inlet_drywet)<<4);
+v = ___SMMLA(value, inlet_drywet<<4, v);
 outlet_outLeft=  __SSAT(v<<1,28);
 
 value = oDelay[1].step(inlet_inRight);
-
-v = ___SMMUL(inlet_inRight, 0x7fffffff-param_dryWet);
-v = ___SMMLA(value, param_dryWet, v);
+//outlet_outRight = value;
+v = ___SMMUL(inlet_inRight,(0x7ffffff-inlet_drywet)<<4);
+v = ___SMMLA(value, inlet_drywet<<4, v);
 outlet_outRight=  __SSAT(v<<1,28);]]></code.srate>
    </obj.normal>
 </objdefs>

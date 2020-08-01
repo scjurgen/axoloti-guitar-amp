@@ -1,13 +1,16 @@
 <objdefs appVersion="2.0.0">
-   <obj.normal id="input_diffusor" uuid="5ea726f7-2322-4b70-b506-fb82d404d6f9">
-      <sDescription>samplesize variant 4 chain combfilter with prestage fixed damper (0.9995)
+   <obj.normal id="input_diffusor" uuid="241988fe-803b-4ae2-9642-0eb1716b6cb3">
+      <sDescription>samplesize variant 4 chain combfilter
 Jon Dattorro, Effect Desgin, J.Audio Eng.Soc, Vol.45, No. 9, 1997 September
-Modified by adding damping on all filters.</sDescription>
+
+Modified by adding damping on all filters in the feedback loop.</sDescription>
       <author>Jürgen Schwietering</author>
       <license>BSD</license>
       <helpPatch>fdbkcomb.axh</helpPatch>
       <inlets>
          <frac32buffer name="in" description="in"/>
+         <frac32 name="fdbk" description=""/>
+         <frac32 name="damping" description=""/>
       </inlets>
       <outlets>
          <frac32buffer name="out" description="out"/>
@@ -140,28 +143,26 @@ rng[0].initSram(attr_chainSize1, sram_buffer1);
 rng[1].initSram(attr_chainSize2, sram_buffer2);
 rng[2].initSram(attr_chainSize3, sram_buffer3);
 rng[3].initSram(attr_chainSize4, sram_buffer4);]]></code.init>
-      <code.krate><![CDATA[static int32_t oldFdbk12=123;
-if (oldFdbk12!=param_fdbk12)
+      <code.krate><![CDATA[static int32_t oldFdbk=123;
+
+if (oldFdbk!=inlet_fdbk)
 {
-	oldFdbk12 = param_fdbk12;
-	rng[0].gain(param_fdbk12);
-	rng[1].gain(param_fdbk12, true);
-}
-static int32_t oldFdbk34=123;
-if (oldFdbk34!=param_fdbk34)
-{
-	oldFdbk34 = param_fdbk34;
-	rng[2].gain(param_fdbk34);
-	rng[3].gain(param_fdbk34, true);
+	oldFdbk = inlet_fdbk;
+	rng[0].gain(inlet_fdbk);
+	rng[1].gain(inlet_fdbk, true);
+
+	int32_t a = inlet_fdbk*5/6;
+	rng[2].gain(a);
+	rng[3].gain(a, true);
 }
 
 static int32_t oldDamping=123;
-if (oldDamping!=param_damping)
+if (oldDamping!=inlet_damping)
 {
-	oldDamping = param_damping;
+	oldDamping = inlet_damping;
 	for (int c=0; c < 4; ++c)
 	{
-		rng[c].setDamping(param_damping);
+		rng[c].setDamping(inlet_damping);
 	}
 }]]></code.krate>
       <code.srate><![CDATA[int32_t value = inlet_in;

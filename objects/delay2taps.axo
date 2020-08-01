@@ -1,7 +1,7 @@
 <objdefs appVersion="2.0.0">
    <obj.normal id="delay2taps" uuid="86aeaaaa-6b8d-45b4-9887-6f68da20c8c5">
       <author>Jürgen Schwietering</author>
-      <license>BSD</license>
+      <license>MIT</license>
       <helpPatch>fdbkcomb.axh</helpPatch>
       <inlets>
          <frac32buffer name="in" description="in"/>

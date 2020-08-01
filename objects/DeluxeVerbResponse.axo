@@ -26,7 +26,7 @@
       <attribs/>
       <file-depends/>
       <includes>
-         <include>/Users/jurgenschwietering/Desktop/axoloti-amp/FilterChain.h</include>
+         <include>/Users/jurgenschwietering/Desktop/axoloti-guitar-amp/FilterChain.h</include>
       </includes>
       <depends/>
       <modules/>
@@ -34,7 +34,7 @@
 
 #define M_PI 3.1415926535
 
-FilterSet<10> initial ={ // dt = 1.755837 - 'deluxe-vrb-norm-master5 Left 1x12 Right 2x12.right.csv'
+FilterSet<13> initial ={ // dt = 1.755837 - 'deluxe-vrb-norm-master5 Left 1x12 Right 2x12.right.csv'
 0.717758, 13, {
     {LoPass, 2, EQ_NONE, 2660.5, 0, 4.761},	//  0 
     {LoPass, 2, EQ_NONE, 7525.04, 0, 13.689},	//  1 
@@ -57,7 +57,7 @@ FilterChain<13,0> ampChain;]]></code.declaration>
       <code.krate><![CDATA[static int krateCount=2990;
 if (krateCount++ >= 1000)
 {
-	ampChain.setGain(q27_to_float(param_gainLow), q27_to_float(param_gainMid), q27_to_float(param_gainHigh));
+	ampChain.setEQ(q27_to_float(param_gainLow), q27_to_float(param_gainMid), q27_to_float(param_gainHigh));
 	krateCount = 0;
 //	krate30(parameters);
 }

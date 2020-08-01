@@ -1,8 +1,9 @@
 #pragma once
+
 #include "FilterSet.h"
 #include "FilterBiquad.h"
 #include "FeedbackRing.h"
-#include "PitchDelay.h"
+
 typedef float FloatBuffer[BUFSIZE];
 
 #define A 0.0776509570923569

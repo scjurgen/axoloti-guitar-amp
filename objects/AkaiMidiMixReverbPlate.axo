@@ -15,6 +15,11 @@
          <frac32.bipolar name="diffusorFeedback" description=""/>
          <frac32.positive name="diffusorDamping" description=""/>
          <int32 name="predelayMsecs" description=""/>
+         <frac32.positive name="pitchFeedback" description=""/>
+         <frac32.positive name="pitchDamping" description=""/>
+         <frac32.positive name="pitchRatioLeft" description=""/>
+         <frac32.positive name="pitchMix" description=""/>
+         <frac32.positive name="pitchRatioRight" description=""/>
       </outlets>
       <displays/>
       <params>
@@ -46,6 +51,13 @@
      int32_t diffusorDamping;
      
      int32_t predelayMsecs;
+     
+     int32_t pitchFeedback;
+     int32_t pitchDamping;
+     int32_t pitchRatioLeft;
+     int32_t pitchRatioRight;
+     int32_t pitchMix;
+     
 };
 
 DataSet dataSet = 
@@ -54,7 +66,150 @@ DataSet dataSet =
 	0, 0, 
 	0, 
 	0, 0, 
-	100
+	100,
+	0,0,0x7ffffff,0x7ffffff,0x2000000,
+};
+
+/*
+import math
+def getRatio(x:float):
+    return math.pow(math.pow(2,1/12),x)
+for i in range(-12,14):
+    for cents in range(-2,3):
+        idx = (i+12)*5+(cents+2)
+        print("{v}, // {idx}".format(idx=idx, v=getRatio(i+cents/10.0)))
+*/
+
+float mapRatio[]=
+{
+0.49425701017644785, // 0
+0.4971202119087734, // 1
+0.4999999999999997, // 2
+0.5028964705339265, // 3
+0.5058097201509609, // 4
+0.5236470614103131, // 5
+0.5266805179774177, // 6
+0.5297315471796474, // 7
+0.5328002508142419, // 8
+0.5358867312681463, // 9
+0.5547847360339223, // 10
+0.5579985713151114, // 11
+0.5612310241546863, // 12
+0.5644822024030653, // 13
+0.5677522145354384, // 14
+0.5877739531418041, // 15
+0.5911788930135738, // 16
+0.5946035575013603, // 17
+0.5980480608687017, // 18
+0.6015125180410581, // 19
+0.6227248111794113, // 20
+0.6263322193120637, // 21
+0.6299605249474364, // 22
+0.6336098491435309, // 23
+0.6372803136596309, // 24
+0.6597539553864469, // 25
+0.6635758711692838, // 26
+0.667419927085017, // 27
+0.6712862513901315, // 28
+0.6751749730840948, // 29
+0.6989849670895095, // 30
+0.7030341458111745, // 31
+0.7071067811865474, // 32
+0.7112030090986405, // 33
+0.715322966217629, // 34
+0.740548776143282, // 35
+0.7448387315613509, // 36
+0.7491535384383405, // 37
+0.7534933407372878, // 38
+0.7578582832551989, // 39
+0.7845840978967505, // 40
+0.7891291473386415, // 41
+0.7937005259840996, // 42
+0.7982983863566497, // 43
+0.8029228818633763, // 44
+0.8312378961427876, // 45
+0.8360532082885093, // 46
+0.8408964152537144, // 47
+0.8457676786314484, // 48
+0.8506671609508556, // 49
+0.8806658735961483, // 50
+0.8857675191023605, // 51
+0.8908987181403393, // 52
+0.8960596419119524, // 53
+0.9012504626108302, // 54
+0.9330329915368074, // 55
+0.938437996671143, // 56
+0.9438743126816934, // 57
+0.9493421209505192, // 58
+0.9548416039104165, // 59
+0.9885140203528962, // 60
+0.9942404238175473, // 61
+1.0, // 62
+1.0057929410678534, // 63
+1.0116194403019225, // 64
+1.0472941228206267, // 65
+1.053361035954836, // 66
+1.0594630943592953, // 67
+1.0656005016284844, // 68
+1.0717734625362931, // 69
+1.109569472067845, // 70
+1.1159971426302233, // 71
+1.122462048309373, // 72
+1.1289644048061314, // 73
+1.1355044290708776, // 74
+1.175547906283609, // 75
+1.1823577860271484, // 76
+1.1892071150027212, // 77
+1.196096121737404, // 78
+1.2030250360821169, // 79
+1.2454496223588232, // 80
+1.2526644386241281, // 81
+1.2599210498948734, // 82
+1.2672196982870625, // 83
+1.2745606273192625, // 84
+1.3195079107728944, // 85
+1.3271517423385684, // 86
+1.3348398541700346, // 87
+1.3425725027802637, // 88
+1.3503499461681903, // 89
+1.3979699341790197, // 90
+1.40606829162235, // 91
+1.4142135623730954, // 92
+1.4224060181972817, // 93
+1.4306459324352587, // 94
+1.4810975522865646, // 95
+1.4896774631227028, // 96
+1.498307076876682, // 97
+1.5069866814745763, // 98
+1.5157165665103987, // 99
+1.569168195793502, // 100
+1.5782582946772836, // 101
+1.5874010519682, // 102
+1.5965967727133004, // 103
+1.6058457637267534, // 104
+1.6624757922855762, // 105
+1.6721064165770194, // 106
+1.6817928305074297, // 107
+1.6915353572628977, // 108
+1.701334321901712, // 109
+1.7613317471922978, // 110
+1.771535038204722, // 111
+1.7817974362806794, // 112
+1.7921192838239057, // 113
+1.8025009252216613, // 114
+1.8660659830736157, // 115
+1.8768759933422872, // 116
+1.887748625363388, // 117
+1.8986842419010392, // 118
+1.909683207820834, // 119
+1.9770280407057934, // 120
+1.9884808476350957, // 121
+2.000000000000001, // 122
+2.0115858821357078, // 123
+2.023238880603846, // 124
+2.094588245641255, // 125
+2.106722071909673, // 126
+2.1189261887185915, // 127
 };]]></code.declaration>
       <code.krate><![CDATA[outlet_modulationTime = dataSet.modulationTime;
 outlet_modulationFeedback = dataSet.modulationFeedback;
@@ -67,48 +222,68 @@ outlet_inputDiffusorDamping = dataSet.inputDiffusorDamping;
 outlet_tankFeedback = dataSet.tankFeedback;
 outlet_diffusorFeedback = dataSet.diffusorFeedback;
 outlet_diffusorDamping = dataSet.diffusorDamping;
-outlet_predelayMsecs = dataSet.predelayMsecs;]]></code.krate>
+outlet_predelayMsecs = dataSet.predelayMsecs;
+outlet_pitchFeedback = dataSet.pitchFeedback;
+outlet_pitchDamping = dataSet.pitchDamping;
+outlet_pitchRatioLeft = dataSet.pitchRatioLeft;
+outlet_pitchMix = dataSet.pitchMix;
+outlet_pitchRatioRight = dataSet.pitchRatioRight;]]></code.krate>
       <code.midihandler><![CDATA[LogTextMessage("%02x %d %d", status, data1, data2);
 if (status==0xB0)
 {
 	switch(data1)
 	{
 		case 16:
-			dataSet.modulationFeedback = data2<<20;
-			break;
-		case 17:
-			dataSet.modulationDamp = data2<<20;
-			break;
-		case 18:
-			dataSet.modulationTime = data2<<4;
-			break;
-		case 19:
-			dataSet.modulationDepth = data2<<1;
-			break;
-		case 22:
-			dataSet.modulationTime2 = data2<<4;
-			break;
-		case 23:
-			dataSet.modulationDepth2 = data2<<1;
-			break;
-		case 24:
 			dataSet.inputDiffusorFeedback = data2<<20;
 			break;
-		case 25:
+		case 17:
 			dataSet.inputDiffusorDamping = data2<<20;
 			break;
-
-		case 26:
-			dataSet.tankFeedback = data2<<20;
+		case 18:
+			dataSet.predelayMsecs = data2<<1;
 			break;
-		case 27:
+
+		case 20:
+			dataSet.modulationFeedback = data2<<20;
+			break;
+		case 21:
+			dataSet.modulationDamp = data2<<20;
+			break;
+		case 22:
+			dataSet.modulationTime = data2<<4;
+			break;
+		case 23:
+			dataSet.modulationDepth = data2<<1;
+			break;
+		case 24:
+			dataSet.modulationTime2 = data2<<4;
+			break;
+		case 25:
+			dataSet.modulationDepth2 = data2<<1;
+			break;
+		case 28:
 			dataSet.diffusorFeedback = data2<<10;
 			break;
-		case 30:
+		case 29:
 			dataSet.diffusorDamping = data2<<10;
 			break;
-		case 31:
-			dataSet.predelayMsecs = data2<<1;
+		case 46:
+			dataSet.pitchFeedback = data2<<20;
+			break;
+		case 47:
+			dataSet.pitchDamping = data2<<20;
+			break;
+		case 48:
+			dataSet.pitchRatioLeft = float_to_q27(mapRatio[data2]);
+			break;
+		case 49:
+			dataSet.pitchMix = data2<<20;
+			break;
+		case 52:
+			dataSet.pitchRatioRight = float_to_q27(mapRatio[data2]);
+			break;
+		case 58:
+			dataSet.tankFeedback = data2<<20;
 			break;
 	}
 }]]></code.midihandler>
