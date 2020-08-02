@@ -61,15 +61,28 @@ public:
 	{
 	}
 
+	~FedbackRing()
+	{
+		if (m_buffer)
+		{
+			dispose();
+		}
+	}
+
+	void dispose()
+	{
+		ax_free(m_buffer);
+		m_buffer = 0;
+	}
 
 	void init(int sizeMsecs)
 	{
 		int size = 48000*sizeMsecs/1000;
-		m_buffer = (int32_t *) sdram_malloc(size*sizeof(int32_t));
+		m_buffer = (int16_t *) sdram_malloc(size*sizeof(int32_t));
 		LogTextMessage("tapedelay mem: %d", size);
 		m_maxSize = size;
 		m_size = size;
-		memset(m_buffer, 0, sizeof(int32_t)*m_size);
+		memset(m_buffer, 0, sizeof(int16_t)*m_size);
 		m_head = 0;
 		prev = 0;
 		offset = 0;
@@ -128,9 +141,9 @@ public:
 		int head = m_head;
 		for (int i=0; i < BUFSIZE; ++i)
 		{
-			int32_t outBuffer = m_buffer[m_head];
+			int32_t outBuffer = m_buffer[m_head]<<12;
 			int32_t writeBack = damper(___SMMLA(outBuffer<<2, m_feedback<<3, in[i]));
-			m_buffer[m_head++] = writeBack;
+			m_buffer[m_head++] = writeBack>>12;
 			if (m_head >= m_size)
 				m_head = 0;
 
@@ -169,7 +182,7 @@ private:
 	int32_t m_maxSize;
 	int32_t m_head;
 	int32_t m_feedback;
-	int32_t *m_buffer;
+	int16_t *m_buffer;
      int32_t m_damper;
 	int32_t prev;
 	int32_t offset;
@@ -180,6 +193,7 @@ private:
 
 FeedbackRing rng;]]></code.declaration>
       <code.init><![CDATA[rng.init(attr_chainSizeMsecs);]]></code.init>
+      <code.dispose><![CDATA[rng.dispose();]]></code.dispose>
       <code.krate><![CDATA[int32_t oldFdbk=123;
 
 if (oldFdbk!=inlet_fdbk)

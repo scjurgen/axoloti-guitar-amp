@@ -33,7 +33,7 @@
       <attribs/>
       <file-depends/>
       <includes>
-         <include>/Users/jurgenschwietering/Desktop/axoloti-amp/FilterChain.h</include>
+         <include>/Users/jurgenschwietering/Desktop/axoloti-guitar-amp/FilterChain.h</include>
       </includes>
       <depends/>
       <modules/>

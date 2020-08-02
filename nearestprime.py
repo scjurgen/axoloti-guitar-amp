@@ -26,11 +26,11 @@ def nearestPrime(value: int, step: int) -> int:
     return value
 
 
-def noteToFreq(note: float):
+def noteToFreq(note: float) -> float:
     return 440.0 * math.pow(math.pow(2.0, 1.0 / 12.0), note - 69.0)
 
 
-def allPassBufferSize(f: float, samplerate: float):
+def allPassBufferSize(f: float, samplerate: float) -> float:
     return round(samplerate / f)
 
 
@@ -43,6 +43,12 @@ if len(sys.argv) != 2:
     sys.exit(-1)
 
 samplerate = float(sys.argv[1])
+
+def noteName(i:int) -> str:
+    notenameList = ['C','Db','D','Eb','E','F','F#','G','Ab','A','Bb','B']
+    return "{}{}".format(notenameList[i%12], int(i/12)-1)
+
+
 
 for i in range(0, 128):
     f = noteToFreq(i)
@@ -61,4 +67,4 @@ for i in range(0, 128):
     fTarget = samplerate / primebuffersize
     cents = (12 * math.log(fTarget / 440.0) / math.log(2.0) + 69.0) * 100.0
     centDifference = round(cents - i * 100.0)
-    print("{}\t{}\t{}\t{}\t{}".format(i, f, buffersize, primebuffersize, centDifference))
+    print("{}\t{}\t{}\t{}\t{}\t{}".format(i, f, buffersize, primebuffersize, centDifference, noteName(i)))

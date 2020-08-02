@@ -17,7 +17,13 @@ public:
 
     ~PitchDelay()
     {
-        // sdram_free(m_buffer);
+        dispose();
+    }
+    void dispose()
+    {
+        if (m_buffer)
+            ax_free(m_buffer);
+        m_buffer = 0;
     }
 
     // with axoloti core RAII not possible, therefor you need to call init

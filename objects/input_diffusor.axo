@@ -16,17 +16,7 @@ Modified by adding damping on all filters in the feedback loop.</sDescription>
          <frac32buffer name="out" description="out"/>
       </outlets>
       <displays/>
-      <params>
-         <frac32.s.map.ratio name="fdbk12">
-            <DefaultValue v="48.0"/>
-         </frac32.s.map.ratio>
-         <frac32.s.map.ratio name="fdbk34">
-            <DefaultValue v="40.0"/>
-         </frac32.s.map.ratio>
-         <frac32.u.map name="damping" description="">
-            <DefaultValue v="0.0"/>
-         </frac32.u.map>
-      </params>
+      <params/>
       <attribs>
          <spinner name="chainSize1" MinValue="100" MaxValue="500" DefaultValue="227"/>
          <spinner name="chainSize2" MinValue="100" MaxValue="300" DefaultValue="171"/>

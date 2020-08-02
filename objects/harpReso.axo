@@ -1,0 +1,304 @@
+<objdefs appVersion="2.0.0">
+   <obj.normal id="harpReso" uuid="6d57d24e-1734-482c-aa77-6d6cd6e11a91">
+      <author>Jürgen Schwietering</author>
+      <license>MIT</license>
+      <inlets>
+         <frac32buffer name="in" description="in"/>
+         <frac32 name="fdbk" description=""/>
+         <frac32 name="damping" description=""/>
+      </inlets>
+      <outlets>
+         <frac32buffer name="out" description="out"/>
+      </outlets>
+      <displays/>
+      <params>
+         <int32 name="note1" description="">
+            <MinValue i="31"/>
+            <MaxValue i="128"/>
+         </int32>
+         <int32 name="note2" description="">
+            <MinValue i="24"/>
+            <MaxValue i="127"/>
+         </int32>
+         <int32 name="note3" description="">
+            <MinValue i="24"/>
+            <MaxValue i="127"/>
+         </int32>
+         <int32 name="note4" description="">
+            <MinValue i="24"/>
+            <MaxValue i="128"/>
+         </int32>
+      </params>
+      <attribs/>
+      <file-depends/>
+      <includes/>
+      <depends/>
+      <modules/>
+      <code.declaration><![CDATA[class FeedbackRing2
+{
+
+public:
+	FeedbackRing2()
+	: m_size(0)
+	, m_head(0)
+	, m_gain(0)
+	, m_buffer(0)
+	, m_adjustGain(false)
+	{
+		
+	}
+
+	void reset()
+	{
+		memset(m_buffer,0, sizeof(int32_t)*m_size);
+		m_head = 0;
+		m_adjustGain = false;	
+	}
+
+	void init(int size)
+	{
+		m_buffer = (int32_t *) sdram_malloc(sizeof(int32_t)*size);
+		m_size = size;
+		reset();
+	}
+
+	void setCurrentSize(int size)
+	{
+		if (size>= m_size)
+		{
+			size = m_size;
+		}
+		m_currentSize = size;
+	}
+	
+	void gain(int32_t gain_q27, bool adjustGain=false)
+	{
+		if (float_to_q27(0.995) <= gain_q27)
+			gain_q27 = float_to_q27(0.995);
+		m_gain = gain_q27<<3;
+		m_outgain = 8<<27;
+		if (adjustGain)
+		{
+			adjustOutputGain();
+		}
+		// LogTextMessage("%f %f", q27_to_float(m_gain)/8.0, q27_to_float(m_outgain)/8.0);
+	}
+
+	void adjustOutputGain()
+	{
+		const float cx=1.0, cy=0.35, cd=0.73;
+		float currentAdjust = 1.0/((1.0f / (cx-fabs(q27_to_float(m_gain>>3)))) * cd + cy);
+		m_outgain = float_to_q27(currentAdjust)<<3;
+		m_adjustGain = true;
+	}
+
+	void setDamping(int32_t damping)
+	{
+		m_damper = damping;
+	}
+	
+	int32_t step(int32_t in)
+	{
+		int32_t ret = ___SMMLA(in<<2, m_gain, m_buffer[m_head]);
+		int32_t satValue = ___SMMLA(m_buffer[m_head]<<2, -m_gain, in); // N.B. negativ feedback
+		int32_t delta = prev-satValue;
+		offset =___SMMUL(m_damper<<3,offset<<2)+delta;
+		prev = satValue;
+		m_buffer[m_head++] = offset+satValue;
+		
+		if (m_head >= m_currentSize)
+			m_head = 0;
+		if (m_adjustGain)
+		{
+			ret = ___SMMUL(ret, m_outgain)<<2;
+		}
+		return ret;
+	}
+	
+	int32_t tap(int32_t position)
+	{
+		return m_buffer[position];
+	}
+
+private:
+	int32_t m_size;
+	int32_t m_head;
+	int32_t m_gain;
+	int32_t m_outgain;
+	bool m_adjustGain;
+	int32_t *m_buffer;
+	int32_t m_damper;
+	int32_t prev;
+	int32_t offset;
+};
+FeedbackRing2 rng[4];
+
+const int16_t bufferSizesClean[128] =
+        {5871, // 0 C-1
+         5541, // 1 Db-1
+         5230, // 2 D-1
+         4937, // 3 Eb-1
+         4660, // 4 E-1
+         4398, // 5 F-1
+         4151, // 6 F#-1
+         3918, // 7 G-1
+         3698, // 8 Ab-1
+         3491, // 9 A-1
+         3295, // 10 Bb-1
+         3110, // 11 B-1
+         2935, // 12 C0
+         2771, // 13 Db0
+         2615, // 14 D0
+         2468, // 15 Eb0
+         2330, // 16 E0
+         2199, // 17 F0
+         2076, // 18 F#0
+         1959, // 19 G0
+         1849, // 20 Ab0
+         1745, // 21 A0
+         1647, // 22 Bb0
+         1555, // 23 B0
+         1468, // 24 C1
+         1385, // 25 Db1
+         1308, // 26 D1
+         1234, // 27 Eb1
+         1165, // 28 E1
+         1100, // 29 F1
+         1038, // 30 F#1
+         980, // 31 G1
+         925, // 32 Ab1
+         873, // 33 A1
+         824, // 34 Bb1
+         778, // 35 B1
+         734, // 36 C2
+         693, // 37 Db2
+         654, // 38 D2
+         617, // 39 Eb2
+         582, // 40 E2
+         550, // 41 F2
+         519, // 42 F#2
+         490, // 43 G2
+         462, // 44 Ab2
+         436, // 45 A2
+         412, // 46 Bb2
+         389, // 47 B2
+         367, // 48 C3
+         346, // 49 Db3
+         327, // 50 D3
+         309, // 51 Eb3
+         291, // 52 E3
+         275, // 53 F3
+         259, // 54 F#3
+         245, // 55 G3
+         231, // 56 Ab3
+         218, // 57 A3
+         206, // 58 Bb3
+         194, // 59 B3
+         183, // 60 C4
+         173, // 61 Db4
+         163, // 62 D4
+         154, // 63 Eb4
+         146, // 64 E4
+         137, // 65 F4
+         130, // 66 F#4
+         122, // 67 G4
+         116, // 68 Ab4
+         109, // 69 A4
+         103, // 70 Bb4
+         97, // 71 B4
+         92, // 72 C5
+         87, // 73 Db5
+         82, // 74 D5
+         77, // 75 Eb5
+         73, // 76 E5
+         69, // 77 F5
+         65, // 78 F#5
+         61, // 79 G5
+         58, // 80 Ab5
+         55, // 81 A5
+         51, // 82 Bb5
+         49, // 83 B5
+         46, // 84 C6
+         43, // 85 Db6
+         41, // 86 D6
+         39, // 87 Eb6
+         36, // 88 E6
+         34, // 89 F6
+         32, // 90 F#6
+         31, // 91 G6
+         29, // 92 Ab6
+         27, // 93 A6
+         26, // 94 Bb6
+         24, // 95 B6
+         23, // 96 C7
+         22, // 97 Db7
+         20, // 98 D7
+         19, // 99 Eb7
+         18, // 100 E7
+         17, // 101 F7
+         16, // 102 F#7
+         15, // 103 G7
+         14, // 104 Ab7
+         14, // 105 A7
+         13, // 106 Bb7
+         12, // 107 B7
+         11, // 108 C8
+         11, // 109 Db8
+         10, // 110 D8
+         10, // 111 Eb8
+         9, // 112 E8
+         9, // 113 F8
+         8, // 114 F#8
+         8, // 115 G8
+         7, // 116 Ab8
+         7, // 117 A8
+         6, // 118 Bb8
+         6, // 119 B8
+         6, // 120 C9
+         5, // 121 Db9
+         5, // 122 D9
+         5, // 123 Eb9
+         5, // 124 E9
+         4, // 125 F9
+         4, // 126 F#9
+         4, // 127 G9
+        };]]></code.declaration>
+      <code.init><![CDATA[#define MAXSIZE 1468 // note C1 buffersize 48Khz
+
+ 
+rng[0].init(MAXSIZE);
+rng[1].init(MAXSIZE);
+rng[2].init(MAXSIZE);
+rng[3].init(MAXSIZE);]]></code.init>
+      <code.krate><![CDATA[static int32_t oldFdbk=123;
+
+if (oldFdbk!=inlet_fdbk)
+{
+	oldFdbk = inlet_fdbk;
+	for (int c=0; c < 4; ++c)
+		rng[c].gain(inlet_fdbk, true);
+}
+
+static int32_t oldDamping=123;
+if (oldDamping!=inlet_damping)
+{
+	oldDamping = inlet_damping;
+	for (int c=0; c < 4; ++c)
+	{
+		rng[c].setDamping(inlet_damping);
+	}
+}
+
+rng[0].setCurrentSize(bufferSizesClean[param_note1]);
+rng[1].setCurrentSize(bufferSizesClean[param_note2]);
+rng[2].setCurrentSize(bufferSizesClean[param_note3]);
+rng[3].setCurrentSize(bufferSizesClean[param_note4]);]]></code.krate>
+      <code.srate><![CDATA[int32_t value = rng[0].step(inlet_in);
+
+value += rng[1].step(inlet_in);
+value += rng[2].step(inlet_in);
+value += rng[3].step(inlet_in);
+
+outlet_out = __SSAT(value>>2, 28);]]></code.srate>
+   </obj.normal>
+</objdefs>

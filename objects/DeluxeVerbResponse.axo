@@ -47,13 +47,14 @@ FilterSet<13> initial ={ // dt = 1.755837 - 'deluxe-vrb-norm-master5 Left 1x12 R
     {Notch, 1, EQ_NONE, 3103.55, 0, 0.5},	//  8 
     {Peak, 1, EQ_NONE, 71.2719, 4.5, 9.604},	//  9 
 
-        {LoShelf, 1, EQ_LOW, 120, 0.0, 0.707},	//  9
-    {Peak, 1, EQ_MID, 500, 0.0, 0.707},	//  10
-    {HiShelf, 1, EQ_HIGH, 3000, 0.0, 0.707},	//  11 
+    {LoShelf, 1, EQ_LOW, 120, 0.0, 0.707},	
+    {Peak, 1, EQ_MID, 500, 0.0, 0.707},
+    {HiShelf, 1, EQ_HIGH, 3000, 0.0, 0.707},	
 }};
 
 FilterChain<13,0> ampChain;]]></code.declaration>
       <code.init><![CDATA[ampChain.setParams(initial);]]></code.init>
+      <code.dispose><![CDATA[dispose();]]></code.dispose>
       <code.krate><![CDATA[static int krateCount=2990;
 if (krateCount++ >= 1000)
 {

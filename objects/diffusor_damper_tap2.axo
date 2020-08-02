@@ -73,6 +73,8 @@ public:
 		if (float_to_q27(0.97) <= gain_q27)
 			gain_q27 = float_to_q27(0.97);
 		m_gain = gain_q27<<3;
+			LogTextMessage("diffusor gain: %08x in:%08x", m_gain, gain_q27);
+
 		m_outgain = 8<<27;
 		if (adjustGain)
 		{
@@ -91,6 +93,7 @@ public:
 		float currentAdjust = 1.0/((1.0f / (cx-fabs(q27_to_float(m_gain>>3)))) * cd + cy);
 		m_outgain = float_to_q27(currentAdjust)<<3;
 		m_adjustGain = true;
+
 	}
 
 	
@@ -142,13 +145,14 @@ private:
 FeedbackRing rng;]]></code.declaration>
       <code.init><![CDATA[rng.init(attr_chainSize);]]></code.init>
       <code.dispose><![CDATA[rng.dispose();]]></code.dispose>
-      <code.krate><![CDATA[int32_t oldFdbk=123;
+      <code.krate><![CDATA[static int32_t oldFdbk=123;
 
-if (oldFdbk!=inlet_fdbk)
+if (oldFdbk != inlet_fdbk)
 {
 	oldFdbk = inlet_fdbk;
 	rng.gain(oldFdbk, true);
 }
+
 rng.setDamping(inlet_damping);
 
 rng.update(inlet_in, outlet_out, param_tap1, outlet_tap1, param_tap2, outlet_tap2);]]></code.krate>

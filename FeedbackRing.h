@@ -11,7 +11,17 @@ public:
             , m_buffer(0)
     {
     }
-
+    
+    ~FeedbackRing()
+    {
+        dispose();
+    }
+    void dispose()
+    {
+        if (m_buffer)
+            ax_free(m_buffer);
+        m_buffer = 0;       
+    }
 
     void init(int size)
     {
