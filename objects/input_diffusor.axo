@@ -105,6 +105,33 @@ public:
 		}
 		return ret;
 	}
+
+	void update(int32buffer &tmp)
+	{
+		if (m_gain == 0)
+		{
+			return;
+		}
+		for (int i=0; i < BUFSIZE; ++i)
+		{
+			tmp[i] = step(tmp[i]);
+		}
+	}
+
+
+	void update(const int32buffer &in, int32buffer &out)
+	{
+		if (m_gain == 0)
+		{
+			for (int i=0; i < BUFSIZE; ++i)
+				out[i] = in[i];
+			return;
+		}
+		for (int i=0; i < BUFSIZE; ++i)
+		{
+			out[i] = step(in[i]);
+		}
+	}
 	
 	int32_t tap(int32_t position)
 	{
@@ -154,14 +181,22 @@ if (oldDamping!=inlet_damping)
 	{
 		rng[c].setDamping(inlet_damping);
 	}
-}]]></code.krate>
-      <code.srate><![CDATA[int32_t value = inlet_in;
+}
+int32buffer tmp;
+rng[0].update(inlet_in, tmp);
+rng[1].update(tmp);
+rng[2].update(tmp);
+rng[3].update(outlet_out);
 
-value = rng[0].step(value);
-value = rng[1].step(value);
-value = rng[2].step(value);
-value = rng[3].step(value);
 
-outlet_out = value;]]></code.srate>
+]]></code.krate>
+      <code.srate><![CDATA[//int32_t value = inlet_in;
+
+//value = rng[0].step(value);
+//value = rng[1].step(value);
+//value = rng[2].step(value);
+//value = rng[3].step(value);
+
+//outlet_out = value;]]></code.srate>
    </obj.normal>
 </objdefs>

@@ -6,6 +6,50 @@
          <combo attributeName="mode" selection="Stereo"/>
       </attribs>
    </obj>
+   <obj type="tape_delay" uuid="de7d06cb-603e-45d7-a676-473f2c400899" name="tape_delay_1" x="434" y="28">
+      <params>
+         <bool32.tgl name="looperMode" value="1">
+            <presets/>
+         </bool32.tgl>
+         <bool32.tgl name="loopArmRecord" value="1">
+            <presets/>
+         </bool32.tgl>
+         <bool32.tgl name="loopPlay" value="1">
+            <presets/>
+         </bool32.tgl>
+         <int32 name="bpm" value="104">
+            <presets/>
+         </int32>
+         <int32 name="beats" value="2">
+            <presets/>
+         </int32>
+         <frac32.u.map name="levelDry" value="64.0">
+            <modulators/>
+            <presets/>
+         </frac32.u.map>
+         <frac32.u.map name="levelWet" value="41.5">
+            <modulators/>
+            <presets/>
+         </frac32.u.map>
+         <int32 name="tap1" value="60">
+            <presets/>
+         </int32>
+         <frac32.u.map name="levelTap1" value="16.0">
+            <modulators/>
+            <presets/>
+         </frac32.u.map>
+         <int32 name="tap2" value="1">
+            <presets/>
+         </int32>
+         <frac32.u.map name="levelTap2" value="9.5">
+            <modulators/>
+            <presets/>
+         </frac32.u.map>
+      </params>
+      <attribs>
+         <spinner attributeName="chainSizeSeconds" value="40"/>
+      </attribs>
+   </obj>
    <obj type="audio/inconfig" uuid="9a80ef3c19f2a8f81da3a3b7c1c44d18126b97d9" name="inconfig_1" x="14" y="42">
       <params/>
       <attribs>
@@ -581,7 +625,7 @@ distortion.update(inlet_in, outlet_out);]]></code.krate>
          <code.midihandler><![CDATA[]]></code.midihandler>
       </object>
    </patchobj>
-   <obj type="DeluxeVerbResponse" uuid="3c4745ad-07f7-4ada-b37b-8c67fe96ce72" name="DeluxeVerbResponse_1" x="504" y="56">
+   <obj type="DeluxeVerbResponse" uuid="3c4745ad-07f7-4ada-b37b-8c67fe96ce72" name="DeluxeVerbResponse_1" x="672" y="56">
       <params>
          <bool32.tgl name="onoff" value="1">
             <presets/>
@@ -607,7 +651,7 @@ distortion.update(inlet_in, outlet_out);]]></code.krate>
    </obj>
    <obj type="dryWetMixStereo" uuid="067c60e4-7ed2-4574-a6d2-22bfdafcb645" name="dryWetMixStereo_1" x="1554" y="98">
       <params>
-         <frac32.u.map name="balance" value="12.0">
+         <frac32.u.map name="balance" value="7.5">
             <modulators/>
             <presets/>
          </frac32.u.map>
@@ -618,40 +662,14 @@ distortion.update(inlet_in, outlet_out);]]></code.krate>
       <params/>
       <attribs/>
    </obj>
-   <obj type="tape_delay" uuid="de7d06cb-603e-45d7-a676-473f2c400899" name="tape_delay_1" x="336" y="112">
+   <obj type="ctrl/dial p" uuid="cc5d2846c3d50e425f450c4b9851371b54f4d674" name="dial_1" x="322" y="126">
       <params>
-         <int32 name="bpm" value="112">
-            <presets/>
-         </int32>
-         <int32 name="beats" value="2">
-            <presets/>
-         </int32>
-         <frac32.u.map name="levelDry" value="64.0">
-            <modulators/>
-            <presets/>
-         </frac32.u.map>
-         <frac32.u.map name="levelWet" value="20.0">
-            <modulators/>
-            <presets/>
-         </frac32.u.map>
-         <int32 name="tap1" value="48">
-            <presets/>
-         </int32>
-         <frac32.u.map name="levelTap1" value="16.0">
-            <modulators/>
-            <presets/>
-         </frac32.u.map>
-         <int32 name="tap2" value="9">
-            <presets/>
-         </int32>
-         <frac32.u.map name="levelTap2" value="3.5">
+         <frac32.u.map name="value" value="9.0">
             <modulators/>
             <presets/>
          </frac32.u.map>
       </params>
-      <attribs>
-         <spinner attributeName="chainSizeMsecs" value="2103"/>
-      </attribs>
+      <attribs/>
    </obj>
    <patchobj type="patch/object" uuid="2710898e-2b1c-4e0f-9622-45723d38b985" name="predelay_slap" x="826" y="126">
       <params/>
@@ -810,6 +828,15 @@ biquad_dsp(&bs[1],&bc,inlet_right,outlet_right);]]></code.krate>
       <params/>
       <attribs/>
    </obj>
+   <obj type="ctrl/dial p" uuid="cc5d2846c3d50e425f450c4b9851371b54f4d674" name="dial_2" x="322" y="210">
+      <params>
+         <frac32.u.map name="value" value="30.0">
+            <modulators/>
+            <presets/>
+         </frac32.u.map>
+      </params>
+      <attribs/>
+   </obj>
    <obj type="delay3taps" uuid="3e728861-0bb9-4d08-a428-b1eb2014b77c" name="delay3taps_1" x="994" y="322">
       <params>
          <int32 name="width" value="7182">
@@ -931,7 +958,7 @@ outlet_out = a;]]></code.srate>
    </patchobj>
    <obj type="AkaiMidiMixReverbPlate" uuid="bebf5066-c775-498a-b873-9ad22a6cfa38" name="AkaiMidiMixReverbPlate_1" x="308" y="518">
       <params>
-         <int32.hradio name="program" value="5">
+         <int32.hradio name="program" value="7">
             <presets/>
          </int32.hradio>
          <bool32.mom name="save" value="0">
@@ -1232,6 +1259,14 @@ outlet_out = a;]]></code.srate>
          <source obj="tape_delay_1" outlet="out"/>
          <dest obj="DeluxeVerbResponse_1" inlet="in"/>
       </net>
+      <net>
+         <source obj="dial_1" outlet="out"/>
+         <dest obj="tape_delay_1" inlet="fdbk"/>
+      </net>
+      <net>
+         <source obj="dial_2" outlet="out"/>
+         <dest obj="tape_delay_1" inlet="damping"/>
+      </net>
    </nets>
    <settings>
       <subpatchmode>no</subpatchmode>
@@ -1239,8 +1274,8 @@ outlet_out = a;]]></code.srate>
    </settings>
    <notes><![CDATA[]]></notes>
    <windowPos>
-      <x>618</x>
-      <y>258</y>
+      <x>606</x>
+      <y>126</y>
       <width>1785</width>
       <height>1174</height>
    </windowPos>

@@ -1,6 +1,6 @@
 <objdefs appVersion="2.0.0">
    <obj.normal id="tape_delay" uuid="de7d06cb-603e-45d7-a676-473f2c400899">
-      <sDescription>samplesize variant combfilter with 2 taps and damper on feedback</sDescription>
+      <sDescription></sDescription>
       <author>Jürgen Schwietering</author>
       <license>MIT</license>
       <inlets>
@@ -13,6 +13,9 @@
       </outlets>
       <displays/>
       <params>
+         <bool32.tgl name="looperMode" description=""/>
+         <bool32.tgl name="loopArmRecord" description=""/>
+         <bool32.tgl name="loopPlay" description=""/>
          <int32 name="bpm" description="">
             <MinValue i="50"/>
             <MaxValue i="200"/>
@@ -43,7 +46,7 @@
          </frac32.u.map.gain>
       </params>
       <attribs>
-         <spinner name="chainSizeMsecs" MinValue="100" MaxValue="8000" DefaultValue="1000"/>
+         <spinner name="chainSizeSeconds" description="" MinValue="1" MaxValue="40" DefaultValue="40"/>
       </attribs>
       <file-depends/>
       <includes/>
@@ -58,10 +61,11 @@ public:
 	, m_feedback(0)
 	, prev(0)
 	, offset(0)
+	, levelRecordStart(0x1000000)
 	{
 	}
 
-	~FedbackRing()
+	~FeedbackRing()
 	{
 		if (m_buffer)
 		{
@@ -137,29 +141,93 @@ public:
 	
 	int32_t update(const int32buffer in, int32buffer &out)
 	{
-		
-		int head = m_head;
-		for (int i=0; i < BUFSIZE; ++i)
+		if (m_looperMode)
 		{
-			int32_t outBuffer = m_buffer[m_head]<<12;
-			int32_t writeBack = damper(___SMMLA(outBuffer<<2, m_feedback<<3, in[i]));
-			m_buffer[m_head++] = writeBack>>12;
-			if (m_head >= m_size)
-				m_head = 0;
-
-			int32_t retValue =  ___SMMUL(in[i]<<1, m_dryLevel);
-			
-			retValue += ___SMMUL(outBuffer<<1, level[0]);
-			if (tapPos[0])
+			if (playing)
 			{
-				retValue += ___SMMUL(getTap(tapPos[0])<<1, level[1]);
+				int head = m_head;
+				for (int i=0; i < BUFSIZE; ++i)
+				{
+					int32_t looperValue = damper(m_buffer[m_head]<<14);
+					m_head++;
+					if (m_head >= m_recordingSize)
+					{
+						if (m_recordingSize>10000)
+							LogTextMessage("wrap");
+						m_head = 0;
+					}
+		
+					int32_t retValue =  ___SMMUL(in[i]<<1, m_dryLevel);
+					
+					retValue += ___SMMUL(looperValue<<1, level[0]);
+					out[i] = __SSAT(retValue,28);
+				}
 			}
-			if (tapPos[1])
+			else if (armed)
 			{
-				retValue += ___SMMUL(getTap(tapPos[1])<<1, level[2]);
+				for (int i=0; i < BUFSIZE; ++i)
+				{
+					if (abs(in[i]) > levelRecordStart)
+					{
+						recording = true;
+						armed = false;
+						m_head = 0;
+						m_recordingSize = 0;
+					}
+					out[i] = in[i];
+				}
+				if (recording)
+					LogTextMessage("recording started");
 			}
-			out[i] = retValue;
+			else
+			{
+				for (int i=0; i < BUFSIZE; ++i)
+				{
+					out[i] = in[i];
+				}
+			}
+			if (recording)
+			{
+				for (int i=0; i < BUFSIZE; ++i)
+				{
+					m_buffer[m_recordingSize] = __SSAT(in[i] >> 14,16);
+					m_recordingSize++;
+					if (m_recordingSize >= m_maxSize-BUFSIZE-1)
+					{
+						recording = false;
+						playing = false;
+						m_head = 0; // next chunk we will playout
+					}
+					out[i] = in[i];
+				}
+			}
 			
+		}
+		else
+		{
+			int head = m_head;
+			for (int i=0; i < BUFSIZE; ++i)
+			{
+				int32_t outBuffer = m_buffer[m_head]<<14;
+				int32_t writeBack = damper(___SMMLA(outBuffer<<2, m_feedback<<3, in[i]));
+				m_buffer[m_head++] = __SSAT(writeBack>>14,16);
+				if (m_head >= m_size)
+					m_head = 0;
+	
+				int32_t retValue =  ___SMMUL(in[i]<<1, m_dryLevel);
+				
+				retValue += ___SMMUL(outBuffer<<1, level[0]);
+				if (tapPos[0])
+				{
+					retValue += ___SMMUL(getTap(tapPos[0])<<1, level[1]);
+				}
+				if (tapPos[1])
+				{
+					retValue += ___SMMUL(getTap(tapPos[1])<<1, level[2]);
+				}
+				out[i] = retValue;
+				
+			}
 		}
 	}
 	void setDryLevel(int32_t dryLevel)
@@ -177,6 +245,76 @@ public:
 		level[idx] = value;
 	}
 
+	void arm()
+	{
+		armed = true;
+		recording = false;
+		playing = false;
+	}
+
+	void disarm()
+	{
+		armed = false;
+		recording = false;
+		playing = false;
+	}
+
+	bool isArmed()
+	{
+		return armed;
+	}
+	
+	bool isRecording()
+	{
+		return recording;
+	}
+
+	bool isPlaying()
+	{
+		return playing;
+	}
+
+	void stopRecording()
+	{
+		recording = false;
+		playing = true;
+		m_head = 0;
+		LogTextMessage("recording stopped @ %d", m_recordingSize);
+		
+	}
+
+	void play()
+	{
+		playing = true;
+		m_head = 0;
+	}
+
+	void stopPlay()
+	{
+		playing = false;
+	}
+
+	void resetLooper()
+	{
+		m_head = 0;
+		m_recordingSize = 0;
+		memset(m_buffer, 0, BUFSIZE*4);	
+	}
+	
+	void looperMode(bool value)
+	{
+		m_looperMode = value;
+		if (m_looperMode)
+		{
+			resetLooper();
+		}
+	}
+
+	bool isLooperMode()
+	{
+		return m_looperMode;
+	}
+
 private:
 	int32_t m_size;
 	int32_t m_maxSize;
@@ -189,10 +327,19 @@ private:
 	int32_t m_dryLevel;
 	int32_t level[3];
 	int32_t tapPos[2];
+
+	bool m_looperMode;
+	bool armed;
+	bool recording;
+	bool playing;
+	int32_t m_recordingSize;
+	int32_t levelRecordStart;
+
+	
 };
 
 FeedbackRing rng;]]></code.declaration>
-      <code.init><![CDATA[rng.init(attr_chainSizeMsecs);]]></code.init>
+      <code.init><![CDATA[rng.init(attr_chainSizeSeconds*1000);]]></code.init>
       <code.dispose><![CDATA[rng.dispose();]]></code.dispose>
       <code.krate><![CDATA[int32_t oldFdbk=123;
 
@@ -216,6 +363,52 @@ if (kCnt++ > 500)
 	rng.setLevel(2,param_levelTap2);
 	
 	rng.setDamping(inlet_damping);
+}
+
+
+if (param_looperMode && !rng.isLooperMode())
+{
+	rng.looperMode(true);
+}
+
+if (!param_looperMode && rng.isLooperMode())
+{
+	rng.looperMode(false);
+}
+
+if (rng.isLooperMode())
+{
+	if (param_loopArmRecord)
+	{
+		if (!rng.isArmed() && !rng.isRecording())
+			rng.arm();
+	}
+	else {
+		if (rng.isArmed())
+		{
+			rng.disarm();
+		}
+	}
+	
+	
+	if (param_loopPlay)
+	{
+		if (!rng.isPlaying())
+		{
+			if (rng.isRecording())
+			{
+				rng.stopRecording();
+			}
+			rng.play();
+		}
+	}
+	else
+	{
+		if (rng.isPlaying())
+		{
+			rng.stopPlay();
+		}
+	}
 }
 rng.update(inlet_in, outlet_out);]]></code.krate>
    </obj.normal>
