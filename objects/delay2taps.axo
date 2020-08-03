@@ -47,6 +47,7 @@ head = 0;
 tap1 = 0;
 tap2 = 0;
 tap3 = 0;]]></code.init>
+      <code.dispose><![CDATA[ax_free(d);]]></code.dispose>
       <code.srate><![CDATA[outlet_out = d[head];
 d[head++] = inlet_in;
 

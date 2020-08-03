@@ -1,15 +1,16 @@
 <objdefs appVersion="2.0.0">
    <obj.normal id="tape_delay" uuid="de7d06cb-603e-45d7-a676-473f2c400899">
-      <sDescription></sDescription>
       <author>Jürgen Schwietering</author>
       <license>MIT</license>
       <inlets>
-         <frac32buffer name="in" description="in"/>
+         <frac32buffer name="left" description="in"/>
+         <frac32buffer name="right" description=""/>
          <frac32.bipolar name="fdbk" description=""/>
          <frac32.positive name="damping" description=""/>
       </inlets>
       <outlets>
-         <frac32buffer name="out" description="out"/>
+         <frac32buffer name="left" description="out"/>
+         <frac32buffer name="right" description=""/>
       </outlets>
       <displays/>
       <params>
@@ -410,6 +411,6 @@ if (rng.isLooperMode())
 		}
 	}
 }
-rng.update(inlet_in, outlet_out);]]></code.krate>
+rng.update(inlet_left, outlet_left);]]></code.krate>
    </obj.normal>
 </objdefs>

@@ -119,7 +119,7 @@ public:
 	}
 
 
-	void update(const int32buffer &in, int32buffer &out)
+	void update(const int32buffer in, int32buffer &out)
 	{
 		if (m_gain == 0)
 		{
@@ -183,13 +183,11 @@ if (oldDamping!=inlet_damping)
 	}
 }
 int32buffer tmp;
-rng[0].update(inlet_in, tmp);
-rng[1].update(tmp);
-rng[2].update(tmp);
-rng[3].update(outlet_out);
-
-
-]]></code.krate>
+memcpy(outlet_out, inlet_in, sizeof(int32buffer));
+rng[0].update(inlet_in, outlet_out);
+//rng[1].update(tmp);
+//rng[2].update(tmp);
+//rng[3].update(outlet_out);]]></code.krate>
       <code.srate><![CDATA[//int32_t value = inlet_in;
 
 //value = rng[0].step(value);

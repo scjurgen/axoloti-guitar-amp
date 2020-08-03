@@ -1,64 +1,5 @@
 <patch appVersion="2.0.0">
-   <obj type="audio/outconfig" uuid="eace67e3304afaa1bb695b444e9345f2d8adaf00" name="outconfig_1" x="1246" y="14">
-      <params/>
-      <attribs>
-         <combo attributeName="headphones" selection="-18dB"/>
-         <combo attributeName="mode" selection="Stereo"/>
-      </attribs>
-   </obj>
-   <obj type="tape_delay" uuid="de7d06cb-603e-45d7-a676-473f2c400899" name="tape_delay_1" x="434" y="28">
-      <params>
-         <bool32.tgl name="looperMode" value="1">
-            <presets/>
-         </bool32.tgl>
-         <bool32.tgl name="loopArmRecord" value="1">
-            <presets/>
-         </bool32.tgl>
-         <bool32.tgl name="loopPlay" value="1">
-            <presets/>
-         </bool32.tgl>
-         <int32 name="bpm" value="104">
-            <presets/>
-         </int32>
-         <int32 name="beats" value="2">
-            <presets/>
-         </int32>
-         <frac32.u.map name="levelDry" value="64.0">
-            <modulators/>
-            <presets/>
-         </frac32.u.map>
-         <frac32.u.map name="levelWet" value="41.5">
-            <modulators/>
-            <presets/>
-         </frac32.u.map>
-         <int32 name="tap1" value="60">
-            <presets/>
-         </int32>
-         <frac32.u.map name="levelTap1" value="16.0">
-            <modulators/>
-            <presets/>
-         </frac32.u.map>
-         <int32 name="tap2" value="1">
-            <presets/>
-         </int32>
-         <frac32.u.map name="levelTap2" value="9.5">
-            <modulators/>
-            <presets/>
-         </frac32.u.map>
-      </params>
-      <attribs>
-         <spinner attributeName="chainSizeSeconds" value="40"/>
-      </attribs>
-   </obj>
-   <obj type="audio/inconfig" uuid="9a80ef3c19f2a8f81da3a3b7c1c44d18126b97d9" name="inconfig_1" x="14" y="42">
-      <params/>
-      <attribs>
-         <combo attributeName="gain" selection="3dB"/>
-         <combo attributeName="boost" selection="20dB"/>
-         <combo attributeName="mode" selection="Stereo"/>
-      </attribs>
-   </obj>
-   <patchobj type="patch/object" uuid="f4862da9-9964-4a80-b193-84a6c8003dd1" name="Distortion_1" x="196" y="56">
+   <patchobj type="patch/object" uuid="f4862da9-9964-4a80-b193-84a6c8003dd1" name="Distortion_1" x="308" y="14">
       <params>
          <frac32.u.map name="dryWet" value="64.0">
             <modulators/>
@@ -433,15 +374,16 @@
 class Distortion
 {
 public:
-#ifndef M_PI_4
-#define M_PI_4 (3.1415926535897932384626433832795f/4.0f)
-#endif
-
-float __attribute__ ((noinline)) FastArcTan(float x) {
-  return M_PI_4*x - x*(fabs(x) - 1)*(0.2447f + 0.0663f*fabs(x));
-}
+	#ifndef M_PI_4
+	#define M_PI_4 (3.1415926535897932384626433832795f/4.0f)
+	#endif
+	
+	float __attribute__ ((noinline)) FastArcTan(float x) {
+	  return M_PI_4*x - x*(fabs(x) - 1)*(0.2447f + 0.0663f*fabs(x));
+	}
 
 	const float maxGain = 50.0f;
+	
      Distortion()
         : m_dryWet(0.0), m_gain{0.1, 0.1, 0.1}, m_dcBias{0.0, 0.0, 0.0}
     {
@@ -511,16 +453,16 @@ float __attribute__ ((noinline)) FastArcTan(float x) {
         {
         	   float f = params.separationFrequency[0];
         	   LogTextMessage("f=%d", (int)f);
-	        lowBandFilter.setLowpass(f*2);
-	        midBandFilter[0].setHighpass(f);
+	        lowBandFilter.setLowpass(f*2,0.5);
+	        midBandFilter[0].setHighpass(f,0.5);
 	        paramsSet.separationFrequency[0] = params.separationFrequency[0];
         }
         if (paramsSet.separationFrequency[1] != params.separationFrequency[1])
         {
         	   float f = paramsSet.separationFrequency[1];
         	   LogTextMessage("MB HP f=%d", (int)f);
-        	   midBandFilter[1].setLowpass(f*2);
-        	   upperBandFilter.setHighpass(f);
+        	   midBandFilter[1].setLowpass(f*2,0.5);
+        	   upperBandFilter.setHighpass(f,0.5);
 	        paramsSet.separationFrequency[1] = params.separationFrequency[1];
         }
 
@@ -571,7 +513,6 @@ float __attribute__ ((noinline)) FastArcTan(float x) {
         {
         	outInt[i] = float_to_q27(tmp[i]+in[i] * (1.0-m_dryWet));
         }
-
     }
 
 
@@ -625,7 +566,7 @@ distortion.update(inlet_in, outlet_out);]]></code.krate>
          <code.midihandler><![CDATA[]]></code.midihandler>
       </object>
    </patchobj>
-   <obj type="DeluxeVerbResponse" uuid="3c4745ad-07f7-4ada-b37b-8c67fe96ce72" name="DeluxeVerbResponse_1" x="672" y="56">
+   <obj type="DeluxeVerbResponse" uuid="3c4745ad-07f7-4ada-b37b-8c67fe96ce72" name="DeluxeVerbResponse_1" x="700" y="14">
       <params>
          <bool32.tgl name="onoff" value="1">
             <presets/>
@@ -649,26 +590,76 @@ distortion.update(inlet_in, outlet_out);]]></code.krate>
       </params>
       <attribs/>
    </obj>
-   <obj type="dryWetMixStereo" uuid="067c60e4-7ed2-4574-a6d2-22bfdafcb645" name="dryWetMixStereo_1" x="1554" y="98">
-      <params>
-         <frac32.u.map name="balance" value="7.5">
-            <modulators/>
-            <presets/>
-         </frac32.u.map>
-      </params>
-      <attribs/>
-   </obj>
-   <obj type="audio/out stereo" uuid="a1ca7a567f535acc21055669829101d3ee7f0189" name="out_1" x="1666" y="98">
+   <obj type="audio/outconfig" uuid="eace67e3304afaa1bb695b444e9345f2d8adaf00" name="outconfig_1" x="1246" y="14">
       <params/>
-      <attribs/>
+      <attribs>
+         <combo attributeName="headphones" selection="-18dB"/>
+         <combo attributeName="mode" selection="Stereo"/>
+      </attribs>
    </obj>
-   <obj type="ctrl/dial p" uuid="cc5d2846c3d50e425f450c4b9851371b54f4d674" name="dial_1" x="322" y="126">
+   <obj type="audio/inconfig" uuid="9a80ef3c19f2a8f81da3a3b7c1c44d18126b97d9" name="inconfig_1" x="14" y="42">
+      <params/>
+      <attribs>
+         <combo attributeName="gain" selection="3dB"/>
+         <combo attributeName="boost" selection="20dB"/>
+         <combo attributeName="mode" selection="Stereo"/>
+      </attribs>
+   </obj>
+   <obj type="tape_delay" uuid="de7d06cb-603e-45d7-a676-473f2c400899" name="tape_delay_1" x="504" y="56">
       <params>
-         <frac32.u.map name="value" value="9.0">
+         <bool32.tgl name="looperMode" value="0">
+            <presets/>
+         </bool32.tgl>
+         <bool32.tgl name="loopArmRecord" value="0">
+            <presets/>
+         </bool32.tgl>
+         <bool32.tgl name="loopPlay" value="0">
+            <presets/>
+         </bool32.tgl>
+         <int32 name="bpm" value="65">
+            <presets/>
+         </int32>
+         <int32 name="beats" value="2">
+            <presets/>
+         </int32>
+         <frac32.u.map name="levelDry" value="64.0">
+            <modulators/>
+            <presets/>
+         </frac32.u.map>
+         <frac32.u.map name="levelWet" value="21.5">
+            <modulators/>
+            <presets/>
+         </frac32.u.map>
+         <int32 name="tap1" value="0">
+            <presets/>
+         </int32>
+         <frac32.u.map name="levelTap1" value="0.0">
+            <modulators/>
+            <presets/>
+         </frac32.u.map>
+         <int32 name="tap2" value="0">
+            <presets/>
+         </int32>
+         <frac32.u.map name="levelTap2" value="0.0">
             <modulators/>
             <presets/>
          </frac32.u.map>
       </params>
+      <attribs>
+         <spinner attributeName="chainSizeSeconds" value="20"/>
+      </attribs>
+   </obj>
+   <obj type="dryWetMixStereo" uuid="067c60e4-7ed2-4574-a6d2-22bfdafcb645" name="dryWetMixStereo_1" x="1386" y="98">
+      <params>
+         <frac32.u.map name="balance" value="6.5">
+            <modulators/>
+            <presets/>
+         </frac32.u.map>
+      </params>
+      <attribs/>
+   </obj>
+   <obj type="audio/out stereo" uuid="a1ca7a567f535acc21055669829101d3ee7f0189" name="out_1" x="1498" y="98">
+      <params/>
       <attribs/>
    </obj>
    <patchobj type="patch/object" uuid="2710898e-2b1c-4e0f-9622-45723d38b985" name="predelay_slap" x="826" y="126">
@@ -718,7 +709,7 @@ if (tail >= maxSize)
          <code.midihandler><![CDATA[]]></code.midihandler>
       </object>
    </patchobj>
-   <obj type="input_diffusor" uuid="241988fe-803b-4ae2-9642-0eb1716b6cb3" name="input_diffusor_2" x="910" y="126">
+   <obj type="input_diffusor" uuid="241988fe-803b-4ae2-9642-0eb1716b6cb3" name="input_diffusor_2" x="924" y="126">
       <params/>
       <attribs>
          <spinner attributeName="chainSize1" value="217"/>
@@ -727,7 +718,7 @@ if (tail >= maxSize)
          <spinner attributeName="chainSize4" value="439"/>
       </attribs>
    </obj>
-   <patchobj type="patch/object" uuid="4cbdc865-dce8-48e1-9c86-f69e3b6d101c" name="long_time_decay_feedback" x="1022" y="126">
+   <patchobj type="patch/object" uuid="4cbdc865-dce8-48e1-9c86-f69e3b6d101c" name="long_time_decay_feedback" x="1050" y="126">
       <params/>
       <attribs/>
       <object id="patch/object" uuid="4cbdc865-dce8-48e1-9c86-f69e3b6d101c">
@@ -763,7 +754,7 @@ outlet_right =  __SSAT(inlet_mono + accum, 28);]]></code.srate>
          <code.midihandler><![CDATA[]]></code.midihandler>
       </object>
    </patchobj>
-   <patchobj type="patch/object" uuid="86c089fb-1efb-4da0-8d5a-5d1ddfba4413" name="stereo_highpass" x="1148" y="126">
+   <patchobj type="patch/object" uuid="86c089fb-1efb-4da0-8d5a-5d1ddfba4413" name="stereo_highpass" x="1190" y="126">
       <params>
          <frac32.s.map name="pitch" value="-24.799999713897705">
             <modulators/>
@@ -828,15 +819,6 @@ biquad_dsp(&bs[1],&bc,inlet_right,outlet_right);]]></code.krate>
       <params/>
       <attribs/>
    </obj>
-   <obj type="ctrl/dial p" uuid="cc5d2846c3d50e425f450c4b9851371b54f4d674" name="dial_2" x="322" y="210">
-      <params>
-         <frac32.u.map name="value" value="30.0">
-            <modulators/>
-            <presets/>
-         </frac32.u.map>
-      </params>
-      <attribs/>
-   </obj>
    <obj type="delay3taps" uuid="3e728861-0bb9-4d08-a428-b1eb2014b77c" name="delay3taps_1" x="994" y="322">
       <params>
          <int32 name="width" value="7182">
@@ -884,7 +866,7 @@ biquad_dsp(&bs[1],&bc,inlet_right,outlet_right);]]></code.krate>
       </params>
       <attribs/>
    </obj>
-   <obj type="modFdbkDelay" uuid="37e2fa21-a574-4976-98bb-2f9347702d30" name="modFdbkDelay_1" x="574" y="392">
+   <obj type="modFdbkDelay" uuid="37e2fa21-a574-4976-98bb-2f9347702d30" name="modFdbkDelay_1" x="574" y="434">
       <params/>
       <attribs>
          <spinner attributeName="width" value="1217"/>
@@ -1025,10 +1007,6 @@ outlet_out = a;]]></code.srate>
       <attribs/>
    </obj>
    <nets>
-      <net>
-         <source obj="in_1" outlet="left"/>
-         <dest obj="Distortion_1" inlet="in"/>
-      </net>
       <net>
          <source obj="long_time_decay_feedback" outlet="left"/>
          <dest obj="stereo_highpass" inlet="left"/>
@@ -1174,10 +1152,6 @@ outlet_out = a;]]></code.srate>
          <dest obj="diffusor_damper_tap2_3" inlet="damping"/>
       </net>
       <net>
-         <source obj="Distortion_1" outlet="out"/>
-         <dest obj="tape_delay_1" inlet="in"/>
-      </net>
-      <net>
          <source obj="DeluxeVerbResponse_1" outlet="out"/>
          <dest obj="predelay_slap" inlet="in"/>
          <dest obj="dryWetMixStereo_1" inlet="left"/>
@@ -1256,16 +1230,16 @@ outlet_out = a;]]></code.srate>
          <dest obj="dryWetMixStereo_1" inlet="wetright"/>
       </net>
       <net>
-         <source obj="tape_delay_1" outlet="out"/>
+         <source obj="in_1" outlet="left"/>
+         <dest obj="Distortion_1" inlet="in"/>
+      </net>
+      <net>
+         <source obj="Distortion_1" outlet="out"/>
+         <dest obj="tape_delay_1" inlet="left"/>
+      </net>
+      <net>
+         <source obj="tape_delay_1" outlet="left"/>
          <dest obj="DeluxeVerbResponse_1" inlet="in"/>
-      </net>
-      <net>
-         <source obj="dial_1" outlet="out"/>
-         <dest obj="tape_delay_1" inlet="fdbk"/>
-      </net>
-      <net>
-         <source obj="dial_2" outlet="out"/>
-         <dest obj="tape_delay_1" inlet="damping"/>
       </net>
    </nets>
    <settings>
@@ -1274,9 +1248,9 @@ outlet_out = a;]]></code.srate>
    </settings>
    <notes><![CDATA[]]></notes>
    <windowPos>
-      <x>606</x>
-      <y>126</y>
-      <width>1785</width>
+      <x>756</x>
+      <y>215</y>
+      <width>1804</width>
       <height>1174</height>
    </windowPos>
 </patch>
