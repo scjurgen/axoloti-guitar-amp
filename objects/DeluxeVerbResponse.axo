@@ -54,7 +54,7 @@ FilterSet<13> initial ={ // dt = 1.755837 - 'deluxe-vrb-norm-master5 Left 1x12 R
 
 FilterChain<13,0> ampChain;]]></code.declaration>
       <code.init><![CDATA[ampChain.setParams(initial);]]></code.init>
-      <code.dispose><![CDATA[dispose();]]></code.dispose>
+      <code.dispose><![CDATA[ampChain.dispose();]]></code.dispose>
       <code.krate><![CDATA[static int krateCount=2990;
 if (krateCount++ >= 1000)
 {

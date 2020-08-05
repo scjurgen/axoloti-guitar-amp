@@ -1,0 +1,115 @@
+<objdefs appVersion="2.0.0">
+   <obj.normal id="tubereso" uuid="13f5fb77-f033-4c9a-840a-98e636a3c562">
+      <sDescription>samplesize variant combfilter</sDescription>
+      <author>Juergen Schwietering</author>
+      <license>MIT</license>
+      <helpPatch>fdbkcomb.axh</helpPatch>
+      <inlets>
+         <frac32buffer name="in" description="in"/>
+         <frac32 name="noteheight" description=""/>
+         <frac32.bipolar name="fdbkGain" description="feedback gain"/>
+      </inlets>
+      <outlets>
+         <frac32buffer name="out" description="out"/>
+      </outlets>
+      <displays/>
+      <params/>
+      <attribs/>
+      <file-depends/>
+      <includes/>
+      <depends/>
+      <modules/>
+      <code.declaration><![CDATA[class TubeReso
+{
+	public:
+	void init()
+	{
+		int i;
+		for (i = 0; i < m_maxWidth; i++)
+		   m_d[i] = 0;
+		m_dpos = 0;
+		m_step = 0;
+		m_lastF = 1<<27;
+		m_currentWidth = 120;
+		setFeedback(float_to_q27(0.8));
+	}
+
+	float magnitudeResponse(float alpha)
+	{
+		if (alpha < 0)
+			alpha=-alpha;
+	     float adjustGain = sqrt(alpha*alpha+1.0-2.0*alpha*0.98); // near cos(0) 
+	     // the adjusted gain is very critical to max alpha, best would be a negative feedback if the signal get's to loud?
+		return adjustGain;
+	}
+
+	int32_t step(int32_t in)
+	{
+		in = ___SMMUL(in, m_gainAdjust)<<5;
+		int32_t dout =  m_d[m_dpos];
+		int32_t din = ___SMMUL(m_feedBack, dout) << 5;
+		din += in;
+		 
+		m_d[m_dpos++] = din;
+		if (m_dpos >= m_currentWidth)
+			m_dpos = 0;
+		
+		return din;
+	}
+
+	#define ADJUST_WIDTH 4
+
+	void update(void)
+	{
+		if (--m_step < 0)
+			m_step = ADJUST_WIDTH;
+		if (m_newWidth > m_currentWidth)
+			++m_currentWidth;
+		if (m_newWidth < m_currentWidth)
+			--m_currentWidth;
+	}
+	
+	void setFeedback(int32_t fdbk)
+	{
+		if (fdbk != m_feedBack)
+		{
+			m_feedBack = fdbk;
+			
+			m_gainAdjust = float_to_q27(magnitudeResponse(q27_to_float(fdbk)));
+		}
+	}
+
+	void setNewFrequency(int32_t noteHeight)
+	{
+		if (m_lastF != noteHeight) 
+		{
+			int32_t freq;
+			MTOF(noteHeight, freq);
+			m_newWidth = static_cast<int32_t>(0.5f+32.0f/q27_to_float(freq));     
+			m_lastF = noteHeight;
+			if (m_newWidth < 10)
+				m_newWidth = 10;
+			if (m_newWidth >= m_maxWidth)
+				m_newWidth = m_maxWidth-1;
+		}
+	}
+	int32_t m_gainAdjust;
+	int32_t m_feedBack;
+	int32_t m_maxWidth = 1600;
+	int32_t m_d[1600]; // minimum of 30 HZ (bit lower than B0)
+	int32_t m_dpos;
+	int32_t m_currentWidth;
+	int32_t m_newWidth;
+	int32_t m_lastF;
+	int32_t m_step;
+};
+
+TubeReso tr;]]></code.declaration>
+      <code.init><![CDATA[tr.init();]]></code.init>
+      <code.krate><![CDATA[tr.setFeedback(inlet_fdbkGain);
+tr.setNewFrequency(inlet_noteheight);
+
+tr.update();]]></code.krate>
+      <code.srate><![CDATA[outlet_out = tr.step(inlet_in);]]></code.srate>
+   </obj.normal>
+</objdefs>
