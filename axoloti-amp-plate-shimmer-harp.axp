@@ -1,0 +1,892 @@
+<patch appVersion="2.0.0">
+   <patchobj type="patch/object" uuid="f4862da9-9964-4a80-b193-84a6c8003dd1" name="Distortion_1" x="308" y="14">
+      <params>
+         <frac32.u.map name="dryWet" value="64.0">
+            <modulators/>
+            <presets>
+               <preset index="1">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="2">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="3">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="4">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="5">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="6">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="7">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="8">
+                  <f v="64.0"/>
+               </preset>
+            </presets>
+         </frac32.u.map>
+         <int32 name="tone" value="4920">
+            <presets/>
+         </int32>
+         <int32.small name="splitLow" value="176">
+            <presets/>
+         </int32.small>
+         <int32.small name="splitHigh" value="594">
+            <presets/>
+         </int32.small>
+         <frac32.u.map name="gainLow" value="0.0">
+            <modulators/>
+            <presets>
+               <preset index="1">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="2">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="3">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="4">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="5">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="6">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="7">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="8">
+                  <f v="0.0"/>
+               </preset>
+            </presets>
+         </frac32.u.map>
+         <frac32.s.map name="biasLow" value="0.0">
+            <modulators/>
+            <presets>
+               <preset index="1">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="2">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="3">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="4">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="5">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="6">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="7">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="8">
+                  <f v="0.0"/>
+               </preset>
+            </presets>
+         </frac32.s.map>
+         <frac32.u.map name="levelLow" value="51.0">
+            <modulators/>
+            <presets>
+               <preset index="1">
+                  <f v="62.5"/>
+               </preset>
+               <preset index="2">
+                  <f v="62.5"/>
+               </preset>
+               <preset index="3">
+                  <f v="62.5"/>
+               </preset>
+               <preset index="4">
+                  <f v="62.5"/>
+               </preset>
+               <preset index="5">
+                  <f v="62.5"/>
+               </preset>
+               <preset index="6">
+                  <f v="62.5"/>
+               </preset>
+               <preset index="7">
+                  <f v="62.5"/>
+               </preset>
+               <preset index="8">
+                  <f v="62.5"/>
+               </preset>
+            </presets>
+         </frac32.u.map>
+         <frac32.u.map name="gainMid" value="64.0">
+            <modulators/>
+            <presets>
+               <preset index="1">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="2">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="3">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="4">
+                  <f v="41.0"/>
+               </preset>
+               <preset index="5">
+                  <f v="41.0"/>
+               </preset>
+               <preset index="6">
+                  <f v="41.0"/>
+               </preset>
+               <preset index="7">
+                  <f v="41.0"/>
+               </preset>
+               <preset index="8">
+                  <f v="41.0"/>
+               </preset>
+            </presets>
+         </frac32.u.map>
+         <frac32.s.map name="biasMid" value="-2.0">
+            <modulators/>
+            <presets>
+               <preset index="1">
+                  <f v="3.885780586188048E-16"/>
+               </preset>
+               <preset index="2">
+                  <f v="5.0"/>
+               </preset>
+               <preset index="3">
+                  <f v="4.0"/>
+               </preset>
+               <preset index="4">
+                  <f v="4.0"/>
+               </preset>
+               <preset index="5">
+                  <f v="4.0"/>
+               </preset>
+               <preset index="6">
+                  <f v="4.0"/>
+               </preset>
+               <preset index="7">
+                  <f v="4.0"/>
+               </preset>
+               <preset index="8">
+                  <f v="4.0"/>
+               </preset>
+            </presets>
+         </frac32.s.map>
+         <frac32.u.map name="levelMid" value="24.5">
+            <modulators/>
+            <presets>
+               <preset index="1">
+                  <f v="34.0"/>
+               </preset>
+               <preset index="2">
+                  <f v="51.5"/>
+               </preset>
+               <preset index="3">
+                  <f v="29.5"/>
+               </preset>
+               <preset index="4">
+                  <f v="29.5"/>
+               </preset>
+               <preset index="5">
+                  <f v="29.5"/>
+               </preset>
+               <preset index="6">
+                  <f v="29.5"/>
+               </preset>
+               <preset index="7">
+                  <f v="29.5"/>
+               </preset>
+               <preset index="8">
+                  <f v="29.5"/>
+               </preset>
+            </presets>
+         </frac32.u.map>
+         <frac32.u.map name="gainHigh" value="32.5">
+            <modulators/>
+            <presets>
+               <preset index="1">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="2">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="3">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="4">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="5">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="6">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="7">
+                  <f v="64.0"/>
+               </preset>
+               <preset index="8">
+                  <f v="64.0"/>
+               </preset>
+            </presets>
+         </frac32.u.map>
+         <frac32.s.map name="biasHigh" value="0.0">
+            <modulators/>
+            <presets>
+               <preset index="1">
+                  <f v="-21.0"/>
+               </preset>
+               <preset index="2">
+                  <f v="0.0"/>
+               </preset>
+               <preset index="3">
+                  <f v="-18.0"/>
+               </preset>
+               <preset index="4">
+                  <f v="-18.0"/>
+               </preset>
+               <preset index="5">
+                  <f v="-18.0"/>
+               </preset>
+               <preset index="6">
+                  <f v="-18.0"/>
+               </preset>
+               <preset index="7">
+                  <f v="-18.0"/>
+               </preset>
+               <preset index="8">
+                  <f v="-18.0"/>
+               </preset>
+            </presets>
+         </frac32.s.map>
+         <frac32.u.map name="levelHigh" value="22.5">
+            <modulators/>
+            <presets>
+               <preset index="1">
+                  <f v="15.0"/>
+               </preset>
+               <preset index="2">
+                  <f v="15.0"/>
+               </preset>
+               <preset index="3">
+                  <f v="15.0"/>
+               </preset>
+               <preset index="4">
+                  <f v="15.0"/>
+               </preset>
+               <preset index="5">
+                  <f v="15.0"/>
+               </preset>
+               <preset index="6">
+                  <f v="15.0"/>
+               </preset>
+               <preset index="7">
+                  <f v="15.0"/>
+               </preset>
+               <preset index="8">
+                  <f v="15.0"/>
+               </preset>
+            </presets>
+         </frac32.u.map>
+      </params>
+      <attribs/>
+      <object id="Distortion_1" uuid="f4862da9-9964-4a80-b193-84a6c8003dd1">
+         <inlets>
+            <frac32buffer name="in" description=""/>
+         </inlets>
+         <outlets>
+            <frac32buffer name="out" description=""/>
+         </outlets>
+         <displays/>
+         <params>
+            <frac32.u.map.ratio name="dryWet" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.u.map.ratio>
+            <int32 name="tone" description="">
+               <MinValue i="1000"/>
+               <MaxValue i="10000"/>
+            </int32>
+            <int32.mini name="splitLow" description="">
+               <MinValue i="40"/>
+               <MaxValue i="640"/>
+            </int32.mini>
+            <int32.mini name="splitHigh" description="">
+               <MinValue i="100"/>
+               <MaxValue i="2000"/>
+            </int32.mini>
+            <frac32.u.map name="gainLow" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.u.map>
+            <frac32.s.map name="biasLow" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.s.map>
+            <frac32.u.map name="levelLow" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.u.map>
+            <frac32.u.map name="gainMid" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.u.map>
+            <frac32.s.map name="biasMid" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.s.map>
+            <frac32.u.map name="levelMid" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.u.map>
+            <frac32.u.map name="gainHigh" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.u.map>
+            <frac32.s.map name="biasHigh" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.s.map>
+            <frac32.u.map name="levelHigh" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.u.map>
+         </params>
+         <attribs/>
+         <file-depends/>
+         <includes>
+            <include>/Users/scjurgen/Desktop/axoloti-guitar-amp/FilterChain.h</include>
+         </includes>
+         <depends/>
+         <modules/>
+         <code.declaration><![CDATA[typedef struct
+{
+    float dryWetMix;
+    float gain[3];
+    float dcBias[3];
+    float level[3];
+    int separationFrequency[2];
+    int tone;
+} DistortionParameters;
+
+class Distortion
+{
+public:
+	#ifndef M_PI_4
+	#define M_PI_4 (3.1415926535897932384626433832795f/4.0f)
+	#endif
+	
+	float __attribute__ ((noinline)) FastArcTan(float x) {
+	  return M_PI_4*x - x*(fabs(x) - 1)*(0.2447f + 0.0663f*fabs(x));
+	}
+
+	const float maxGain = 50.0f;
+	
+     Distortion()
+        : m_dryWet(0.0), m_gain{0.1, 0.1, 0.1}, m_dcBias{0.0, 0.0, 0.0}
+    {
+        cnt = 0;
+        removeDc.setHighpass(30,0.707);
+        DistortionParameters initialDistortion =
+            {
+                1.0,{0.0,0.1,0.0},{0.0,0.0,0.0},{0.5,0.7,0.4},{70,500},5000
+            };
+
+        parameters(initialDistortion);
+    }
+
+    float __attribute__ ((noinline)) step(float in, int set)
+    {
+        if (m_gain[set] == 0.0)
+            return in * m_level[set]*4.0;
+        return atan(m_atanGain[set] * (in + m_dcBias[set])) * m_totalGain[set];
+    }
+
+    void __attribute__ ((noinline)) step(FloatBuffer &inPlace, int set)
+    {
+        if (m_gain[set] == 0.0)
+        {
+	        for (int s = 0; s < BUFSIZE; ++s)
+	        {
+		        inPlace[s] = inPlace[s] * m_level[set] * 4.0f;
+	        }
+        }
+        else
+        {
+	        for (int s = 0; s < BUFSIZE; ++s)
+	        {
+	            inPlace[s] = atan(m_atanGain[set] * (inPlace[s] + m_dcBias[set])) * m_totalGain[set];
+	        }
+        }
+    }
+
+    void parameters(DistortionParameters &params)
+    {
+    		if (paramsSet.dryWetMix != params.dryWetMix)
+    		{
+    	        m_dryWet = params.dryWetMix;
+    	        //LogTextMessage("drywet: %f", m_dryWet);
+	        paramsSet.dryWetMix = params.dryWetMix;
+    		}
+    		
+        for (int c = 0; c < 3; ++c)
+        {
+            m_dcBias[c] = params.dcBias[c]/2.0;
+            m_level[c] = params.level[c];
+		  {
+	            m_gain[c] = params.gain[c]*2.0;
+	            if (m_gain[c] == 0.0)
+	            {
+	                m_realAdjustGain[c] = 1.0;
+	            } else
+	            {
+	                m_realAdjustGain[c] = 1.0 / atan(m_gain[c] * maxGain);
+	            }
+	            paramsSet.gain[c] = params.gain[c];
+		  }
+		  m_totalGain[c] = m_realAdjustGain[c] * m_level[c];
+		  m_atanGain[c] = m_gain[c] * maxGain;
+        }
+        if (paramsSet.separationFrequency[0] != params.separationFrequency[0])
+        {
+        	   float f = params.separationFrequency[0];
+        	   LogTextMessage("f=%d", (int)f);
+	        lowBandFilter.setLowpass(f*2,0.5);
+	        midBandFilter[0].setHighpass(f,0.5);
+	        paramsSet.separationFrequency[0] = params.separationFrequency[0];
+        }
+        if (paramsSet.separationFrequency[1] != params.separationFrequency[1])
+        {
+        	   float f = paramsSet.separationFrequency[1];
+        	   LogTextMessage("MB HP f=%d", (int)f);
+        	   midBandFilter[1].setLowpass(f*2,0.5);
+        	   upperBandFilter.setHighpass(f,0.5);
+	        paramsSet.separationFrequency[1] = params.separationFrequency[1];
+        }
+
+        if (paramsSet.tone != params.tone)   
+        {
+        	    float f = params.tone;
+	        lp.setLowpass(f, 0.5);// softer falling off
+	        paramsSet.tone = params.tone;
+    	   }
+    }
+
+    void update(const int32buffer inInt, int32buffer &outInt)
+    {
+        if (m_dryWet == 0.0)
+        {
+        	  memcpy(outInt, inInt, sizeof(int32buffer));
+            return;
+        }
+        FloatBuffer in;
+        for (int i = 0; i < BUFSIZE; ++i)
+        {
+        	in[i] = q27_to_float(inInt[i]);
+        }
+
+        FloatBuffer tmp;
+        FloatBuffer lowBand;
+        FloatBuffer midBand;
+        FloatBuffer upperBand;
+        
+        lowBandFilter.update(in, lowBand, BUFSIZE);
+
+        upperBandFilter.update(in, upperBand, BUFSIZE);
+        midBandFilter[0].update(in, tmp, BUFSIZE);
+        midBandFilter[1].update(tmp, midBand, BUFSIZE);
+        step(lowBand, 0);
+        step(midBand, 1);
+        step(upperBand, 2);
+
+        for (int i = 0; i < BUFSIZE; ++i)
+        {
+            tmp[i] = (lowBand[i] + midBand[i] + upperBand[i]) / 2 * m_dryWet;
+        }
+        FloatBuffer res;
+
+        lp.update(tmp, res, BUFSIZE);
+        removeDc.update(res, tmp,BUFSIZE);
+        for (int i = 0; i < BUFSIZE; ++i)
+        {
+        	outInt[i] = float_to_q27(tmp[i]+in[i] * (1.0-m_dryWet));
+        }
+    }
+
+
+private:
+    AudioFilterBiquad lp;
+    AudioFilterBiquad removeDc;
+    AudioFilterBiquad lowBandFilter;
+    AudioFilterBiquad midBandFilter[2];
+    AudioFilterBiquad upperBandFilter;
+    float m_dryWet;
+    float m_gain[3];
+    float m_level[3];
+    float m_dcBias[3];
+    float m_totalGain[3];
+    float m_atanGain[3];
+    float m_realAdjustGain[3];
+    float maxvalSum;
+    float minVal, maxVal;
+	DistortionParameters paramsSet;
+    int cnt;
+};
+
+Distortion distortion;]]></code.declaration>
+         <code.init><![CDATA[]]></code.init>
+         <code.dispose><![CDATA[]]></code.dispose>
+         <code.krate><![CDATA[static int kcnt = 0;
+if (kcnt++>1000)
+{
+	DistortionParameters params;
+	params.dryWetMix = q27_to_float(param_dryWet);
+	params.gain[0] = q27_to_float(param_gainLow);
+	params.gain[1] = q27_to_float(param_gainMid);
+	params.gain[2] = q27_to_float(param_gainHigh);
+	params.dcBias[0] = q27_to_float(param_biasLow)/2.0;
+	params.dcBias[1] = q27_to_float(param_biasMid)/2.0;
+	params.dcBias[2] = q27_to_float(param_biasHigh)/2.0;
+	params.level[0] = q27_to_float(param_levelLow);
+	params.level[1] = q27_to_float(param_levelMid);
+	params.level[2] = q27_to_float(param_levelHigh);
+	params.tone = (param_tone);
+	params.separationFrequency[0] = (param_splitLow);
+	params.separationFrequency[1] = (param_splitHigh);
+	distortion.parameters(params);
+
+	kcnt = 0;
+}
+
+
+distortion.update(inlet_in, outlet_out);]]></code.krate>
+         <code.srate><![CDATA[]]></code.srate>
+         <code.midihandler><![CDATA[]]></code.midihandler>
+      </object>
+   </patchobj>
+   <patchobj type="patch/object" uuid="62b1c1a6337c7c8f6aec96408a432477b113cfa0" name="gain_1" x="420" y="14">
+      <params>
+         <frac32.u.map name="amp" value="34.0">
+            <modulators/>
+            <presets/>
+         </frac32.u.map>
+      </params>
+      <attribs/>
+      <object id="patch/object" uuid="62b1c1a6337c7c8f6aec96408a432477b113cfa0" sha="cda56a9f0ea80746e47be1a82a59ebc55bdba5d1">
+         <upgradeSha>60c5fcc3503670dd02f8989bba108d80be59b518</upgradeSha>
+         <sDescription>amplify up to 2 times (saturated)</sDescription>
+         <author>JS</author>
+         <license>MIT</license>
+         <helpPatch>math.axh</helpPatch>
+         <inlets>
+            <frac32buffer name="in" description="input"/>
+         </inlets>
+         <outlets>
+            <frac32buffer name="out" description="output"/>
+         </outlets>
+         <displays/>
+         <params>
+            <frac32.u.map.squaregain name="amp" description="">
+               <DefaultValue v="0.0"/>
+            </frac32.u.map.squaregain>
+         </params>
+         <attribs/>
+         <file-depends/>
+         <includes/>
+         <depends/>
+         <modules/>
+         <code.declaration><![CDATA[]]></code.declaration>
+         <code.init><![CDATA[]]></code.init>
+         <code.dispose><![CDATA[]]></code.dispose>
+         <code.krate><![CDATA[]]></code.krate>
+         <code.srate><![CDATA[outlet_out= __SSAT(___SMMUL(param_amp,__SSAT(inlet_in,28)<<1)<<1,28);]]></code.srate>
+         <code.midihandler><![CDATA[]]></code.midihandler>
+      </object>
+   </patchobj>
+   <obj type="audio/outconfig" uuid="eace67e3304afaa1bb695b444e9345f2d8adaf00" name="outconfig_1" x="1596" y="14">
+      <params/>
+      <attribs>
+         <combo attributeName="headphones" selection="-18dB"/>
+         <combo attributeName="mode" selection="Stereo"/>
+      </attribs>
+   </obj>
+   <obj type="audio/inconfig" uuid="9a80ef3c19f2a8f81da3a3b7c1c44d18126b97d9" name="inconfig_1" x="14" y="42">
+      <params/>
+      <attribs>
+         <combo attributeName="gain" selection="3dB"/>
+         <combo attributeName="boost" selection="20dB"/>
+         <combo attributeName="mode" selection="Stereo"/>
+      </attribs>
+   </obj>
+   <obj type="tape_delay" uuid="de7d06cb-603e-45d7-a676-473f2c400899" name="tape_delay_1" x="546" y="42">
+      <params>
+         <int32 name="bpm" value="65">
+            <presets/>
+         </int32>
+         <int32 name="beats" value="4">
+            <presets/>
+         </int32>
+         <frac32.u.map name="levelDry" value="64.0">
+            <modulators/>
+            <presets/>
+         </frac32.u.map>
+         <frac32.u.map name="levelWet" value="64.0">
+            <modulators/>
+            <presets/>
+         </frac32.u.map>
+         <int32 name="tap1" value="24">
+            <presets/>
+         </int32>
+         <frac32.u.map name="levelTap1" value="0.0">
+            <modulators/>
+            <presets/>
+         </frac32.u.map>
+         <int32 name="tap2" value="48">
+            <presets/>
+         </int32>
+         <frac32.u.map name="levelTap2" value="0.0">
+            <modulators/>
+            <presets/>
+         </frac32.u.map>
+      </params>
+      <attribs>
+         <spinner attributeName="chainSizeSeconds" value="8"/>
+      </attribs>
+   </obj>
+   <patchobj type="patch/object" uuid="c251ba58-a42c-414c-90f8-1ffe1e20b215" name="downmix_1" x="1134" y="56">
+      <params/>
+      <attribs/>
+      <object id="downmix_1" uuid="c251ba58-a42c-414c-90f8-1ffe1e20b215">
+         <sDescription>7 input downmix</sDescription>
+         <author>Johannes Taelman</author>
+         <license>BSD</license>
+         <inlets>
+            <frac32buffer name="p_in1" description="input 1"/>
+            <frac32buffer name="p_in2" description="input 2"/>
+            <frac32buffer name="n_in3" description="input 3"/>
+            <frac32buffer name="p_in4" description="input 4"/>
+            <frac32buffer name="n_in5" description="input 5"/>
+            <frac32buffer name="n_in6" description="input 6"/>
+            <frac32buffer name="n_in7" description="input 7"/>
+            <frac32buffer name="p_in8" description=""/>
+         </inlets>
+         <outlets>
+            <frac32buffer name="out" description="mix out"/>
+         </outlets>
+         <displays/>
+         <params/>
+         <attribs/>
+         <file-depends/>
+         <includes/>
+         <depends/>
+         <modules/>
+         <code.declaration><![CDATA[]]></code.declaration>
+         <code.init><![CDATA[]]></code.init>
+         <code.dispose><![CDATA[]]></code.dispose>
+         <code.krate><![CDATA[]]></code.krate>
+         <code.srate><![CDATA[int32_t a = inlet_p__in1;
+
+a += inlet_p__in2;
+a -= inlet_n__in3;
+a += inlet_p__in4;
+a -= inlet_n__in5;
+a -= inlet_n__in6;
+a -= inlet_n__in7;
+a += inlet_p__in8;
+outlet_out = a;]]></code.srate>
+         <code.midihandler><![CDATA[]]></code.midihandler>
+      </object>
+   </patchobj>
+   <obj type="DeluxeVerbResponse" uuid="3c4745ad-07f7-4ada-b37b-8c67fe96ce72" name="DeluxeVerbResponse_1" x="1260" y="56">
+      <params>
+         <bool32.tgl name="onoff" value="1">
+            <presets/>
+         </bool32.tgl>
+         <frac32.u.map name="level" value="64.0">
+            <modulators/>
+            <presets/>
+         </frac32.u.map>
+         <frac32.s.map name="gainLow" value="4.0">
+            <modulators/>
+            <presets/>
+         </frac32.s.map>
+         <frac32.s.map name="gainMid" value="10.0">
+            <modulators/>
+            <presets/>
+         </frac32.s.map>
+         <frac32.s.map name="gainHigh" value="14.0">
+            <modulators/>
+            <presets/>
+         </frac32.s.map>
+      </params>
+      <attribs/>
+   </obj>
+   <obj type="noisegate" uuid="83e4da13-6ed0-469c-a0a6-bdcf1de1658f" name="obj_1" x="154" y="84">
+      <params>
+         <frac32.u.map name="Treshold" value="3.0">
+            <modulators/>
+            <presets/>
+         </frac32.u.map>
+         <frac32.s.map name="envelope:a" value="-64.0">
+            <modulators/>
+            <presets/>
+         </frac32.s.map>
+         <frac32.s.map name="envelope:d" value="-39.0">
+            <modulators/>
+            <presets/>
+         </frac32.s.map>
+      </params>
+      <attribs/>
+   </obj>
+   <obj type="dryWetMixStereo" uuid="067c60e4-7ed2-4574-a6d2-22bfdafcb645" name="dryWetMixStereo_1" x="1680" y="98">
+      <params>
+         <frac32.u.map name="balance" value="12.0">
+            <modulators/>
+            <presets/>
+         </frac32.u.map>
+      </params>
+      <attribs/>
+   </obj>
+   <obj type="audio/out stereo" uuid="a1ca7a567f535acc21055669829101d3ee7f0189" name="out_1" x="1820" y="98">
+      <params/>
+      <attribs/>
+   </obj>
+   <obj type="ctrl/dial p" uuid="cc5d2846c3d50e425f450c4b9851371b54f4d674" name="dial_1" x="420" y="126">
+      <params>
+         <frac32.u.map name="value" value="18.0">
+            <modulators/>
+            <presets/>
+         </frac32.u.map>
+      </params>
+      <attribs/>
+   </obj>
+   <obj type="audio/in stereo" uuid="99848ad6d90a8e615e83b2e619cfc806f28e7281" name="in_1" x="42" y="140">
+      <params/>
+      <attribs/>
+   </obj>
+   <obj type="drj/ctrl/dial_pitch" uuid="86ae7d7f49093cb1c94aed72274d118a23d46692" name="dial_pitch_4" x="714" y="196">
+      <params>
+         <frac32.s.map name="pitch" value="-12.0">
+            <modulators/>
+            <presets/>
+         </frac32.s.map>
+      </params>
+      <attribs/>
+   </obj>
+   <obj type="ctrl/dial p" uuid="cc5d2846c3d50e425f450c4b9851371b54f4d674" name="dial_2" x="420" y="210">
+      <params>
+         <frac32.u.map name="value" value="57.5">
+            <modulators/>
+            <presets/>
+         </frac32.u.map>
+      </params>
+      <attribs/>
+   </obj>
+   <obj type="ctrl/dial p" uuid="cc5d2846c3d50e425f450c4b9851371b54f4d674" name="dial_3" x="1694" y="238">
+      <params>
+         <frac32.u.map name="value" value="0.0">
+            <modulators/>
+            <presets/>
+         </frac32.u.map>
+      </params>
+      <attribs/>
+   </obj>
+   <obj type="tubeResoFloat" uuid="e3dc199d-2897-4a7b-876a-4f15894d439a" name="tubeResoFloat_1" x="840" y="266">
+      <params/>
+      <attribs/>
+   </obj>
+   <obj type="ctrl/toggle" uuid="42b8134fa729d54bfc8d62d6ef3fa99498c1de99" name="toggle_1" x="420" y="294">
+      <params>
+         <bool32.tgl name="b" value="0">
+            <presets/>
+         </bool32.tgl>
+      </params>
+      <attribs/>
+   </obj>
+   <obj type="ctrl/dial p" uuid="cc5d2846c3d50e425f450c4b9851371b54f4d674" name="dial_4" x="742" y="420">
+      <params>
+         <frac32.u.map name="value" value="18.0">
+            <modulators/>
+            <presets/>
+         </frac32.u.map>
+      </params>
+      <attribs/>
+   </obj>
+   <nets>
+      <net>
+         <source obj="DeluxeVerbResponse_1" outlet="out"/>
+         <dest obj="dryWetMixStereo_1" inlet="left"/>
+         <dest obj="dryWetMixStereo_1" inlet="right"/>
+      </net>
+      <net>
+         <source obj="in_1" outlet="left"/>
+         <dest obj="obj_1" inlet="in"/>
+      </net>
+      <net>
+         <source obj="obj_1" outlet="out"/>
+         <dest obj="Distortion_1" inlet="in"/>
+      </net>
+      <net>
+         <source obj="dial_1" outlet="out"/>
+         <dest obj="tape_delay_1" inlet="fdbk"/>
+      </net>
+      <net>
+         <source obj="dial_2" outlet="out"/>
+         <dest obj="tape_delay_1" inlet="damping"/>
+      </net>
+      <net>
+         <source obj="toggle_1" outlet="o"/>
+         <dest obj="tape_delay_1" inlet="hold"/>
+      </net>
+      <net>
+         <source obj="dryWetMixStereo_1" outlet="left"/>
+         <dest obj="out_1" inlet="left"/>
+      </net>
+      <net>
+         <source obj="dryWetMixStereo_1" outlet="right"/>
+         <dest obj="out_1" inlet="right"/>
+      </net>
+      <net>
+         <source obj="downmix_1" outlet="out"/>
+         <dest obj="DeluxeVerbResponse_1" inlet="in"/>
+      </net>
+      <net>
+         <source obj="tape_delay_1" outlet="out"/>
+         <dest obj="downmix_1" inlet="p_in8"/>
+         <dest obj="tubeResoFloat_1" inlet="in"/>
+      </net>
+      <net>
+         <source obj="Distortion_1" outlet="out"/>
+         <dest obj="gain_1" inlet="in"/>
+      </net>
+      <net>
+         <source obj="gain_1" outlet="out"/>
+         <dest obj="tape_delay_1" inlet="in"/>
+      </net>
+      <net>
+         <source obj="tubeResoFloat_1" outlet="out"/>
+         <dest obj="downmix_1" inlet="p_in1"/>
+      </net>
+      <net>
+         <source obj="dial_pitch_4" outlet="out"/>
+         <dest obj="tubeResoFloat_1" inlet="noteheight"/>
+      </net>
+      <net>
+         <source obj="dial_4" outlet="out"/>
+         <dest obj="tubeResoFloat_1" inlet="fdbkGain"/>
+      </net>
+   </nets>
+   <settings>
+      <subpatchmode>no</subpatchmode>
+      <NPresetEntries>30</NPresetEntries>
+   </settings>
+   <notes><![CDATA[]]></notes>
+   <windowPos>
+      <x>318</x>
+      <y>140</y>
+      <width>1966</width>
+      <height>1174</height>
+   </windowPos>
+</patch>

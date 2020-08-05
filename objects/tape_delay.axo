@@ -3,20 +3,16 @@
       <author>Jürgen Schwietering</author>
       <license>MIT</license>
       <inlets>
-         <frac32buffer name="left" description="in"/>
-         <frac32buffer name="right" description=""/>
+         <frac32buffer name="in" description="in"/>
          <frac32.bipolar name="fdbk" description=""/>
          <frac32.positive name="damping" description=""/>
+         <bool32 name="hold" description=""/>
       </inlets>
       <outlets>
-         <frac32buffer name="left" description="out"/>
-         <frac32buffer name="right" description=""/>
+         <frac32buffer name="out" description="out"/>
       </outlets>
       <displays/>
       <params>
-         <bool32.tgl name="looperMode" description=""/>
-         <bool32.tgl name="loopArmRecord" description=""/>
-         <bool32.tgl name="loopPlay" description=""/>
          <int32 name="bpm" description="">
             <MinValue i="50"/>
             <MaxValue i="200"/>
@@ -47,7 +43,7 @@
          </frac32.u.map.gain>
       </params>
       <attribs>
-         <spinner name="chainSizeSeconds" description="" MinValue="1" MaxValue="40" DefaultValue="40"/>
+         <spinner name="chainSizeSeconds" description="" MinValue="1" MaxValue="8" DefaultValue="4"/>
       </attribs>
       <file-depends/>
       <includes/>
@@ -62,7 +58,6 @@ public:
 	, m_feedback(0)
 	, prev(0)
 	, offset(0)
-	, levelRecordStart(0x1000000)
 	{
 	}
 
@@ -142,95 +137,34 @@ public:
 	
 	int32_t update(const int32buffer in, int32buffer &out)
 	{
-		if (m_looperMode)
+
+		for (int i=0; i < BUFSIZE; ++i)
 		{
-			if (playing)
+			int32_t outBuffer = m_buffer[m_head]<<14;
+			int32_t writeBack = damper(___SMMLA(outBuffer<<2, m_feedback<<3, in[i]));
+			if (!hold)
 			{
-				int head = m_head;
-				for (int i=0; i < BUFSIZE; ++i)
-				{
-					int32_t looperValue = damper(m_buffer[m_head]<<14);
-					m_head++;
-					if (m_head >= m_recordingSize)
-					{
-						if (m_recordingSize>10000)
-							LogTextMessage("wrap");
-						m_head = 0;
-					}
-		
-					int32_t retValue =  ___SMMUL(in[i]<<1, m_dryLevel);
-					
-					retValue += ___SMMUL(looperValue<<1, level[0]);
-					out[i] = __SSAT(retValue,28);
-				}
+				m_buffer[m_head] = __SSAT(writeBack>>14,16);
 			}
-			else if (armed)
-			{
-				for (int i=0; i < BUFSIZE; ++i)
-				{
-					if (abs(in[i]) > levelRecordStart)
-					{
-						recording = true;
-						armed = false;
-						m_head = 0;
-						m_recordingSize = 0;
-					}
-					out[i] = in[i];
-				}
-				if (recording)
-					LogTextMessage("recording started");
-			}
-			else
-			{
-				for (int i=0; i < BUFSIZE; ++i)
-				{
-					out[i] = in[i];
-				}
-			}
-			if (recording)
-			{
-				for (int i=0; i < BUFSIZE; ++i)
-				{
-					m_buffer[m_recordingSize] = __SSAT(in[i] >> 14,16);
-					m_recordingSize++;
-					if (m_recordingSize >= m_maxSize-BUFSIZE-1)
-					{
-						recording = false;
-						playing = false;
-						m_head = 0; // next chunk we will playout
-					}
-					out[i] = in[i];
-				}
-			}
+			m_head++;
+			if (m_head >= m_size)
+				m_head = 0;
+
+			int32_t retValue =  ___SMMUL(in[i]<<1, m_dryLevel);
 			
-		}
-		else
-		{
-			int head = m_head;
-			for (int i=0; i < BUFSIZE; ++i)
+			retValue += ___SMMUL(outBuffer<<1, level[0]);
+			if (tapPos[0])
 			{
-				int32_t outBuffer = m_buffer[m_head]<<14;
-				int32_t writeBack = damper(___SMMLA(outBuffer<<2, m_feedback<<3, in[i]));
-				m_buffer[m_head++] = __SSAT(writeBack>>14,16);
-				if (m_head >= m_size)
-					m_head = 0;
-	
-				int32_t retValue =  ___SMMUL(in[i]<<1, m_dryLevel);
-				
-				retValue += ___SMMUL(outBuffer<<1, level[0]);
-				if (tapPos[0])
-				{
-					retValue += ___SMMUL(getTap(tapPos[0])<<1, level[1]);
-				}
-				if (tapPos[1])
-				{
-					retValue += ___SMMUL(getTap(tapPos[1])<<1, level[2]);
-				}
-				out[i] = retValue;
-				
+				retValue += ___SMMUL(getTap(tapPos[0])<<1, level[1]);
 			}
+			if (tapPos[1])
+			{
+				retValue += ___SMMUL(getTap(tapPos[1])<<1, level[2]);
+			}
+			out[i] = retValue;
 		}
 	}
+	
 	void setDryLevel(int32_t dryLevel)
 	{
 		m_dryLevel = dryLevel;
@@ -245,76 +179,7 @@ public:
 		}
 		level[idx] = value;
 	}
-
-	void arm()
-	{
-		armed = true;
-		recording = false;
-		playing = false;
-	}
-
-	void disarm()
-	{
-		armed = false;
-		recording = false;
-		playing = false;
-	}
-
-	bool isArmed()
-	{
-		return armed;
-	}
-	
-	bool isRecording()
-	{
-		return recording;
-	}
-
-	bool isPlaying()
-	{
-		return playing;
-	}
-
-	void stopRecording()
-	{
-		recording = false;
-		playing = true;
-		m_head = 0;
-		LogTextMessage("recording stopped @ %d", m_recordingSize);
-		
-	}
-
-	void play()
-	{
-		playing = true;
-		m_head = 0;
-	}
-
-	void stopPlay()
-	{
-		playing = false;
-	}
-
-	void resetLooper()
-	{
-		m_head = 0;
-		m_recordingSize = 0;
-		memset(m_buffer, 0, BUFSIZE*4);	
-	}
-	
-	void looperMode(bool value)
-	{
-		m_looperMode = value;
-		if (m_looperMode)
-		{
-			resetLooper();
-		}
-	}
-
-	bool isLooperMode()
-	{
-		return m_looperMode;
-	}
+	bool hold;	
 
 private:
 	int32_t m_size;
@@ -328,27 +193,17 @@ private:
 	int32_t m_dryLevel;
 	int32_t level[3];
 	int32_t tapPos[2];
-
-	bool m_looperMode;
-	bool armed;
-	bool recording;
-	bool playing;
-	int32_t m_recordingSize;
-	int32_t levelRecordStart;
-
-	
 };
 
 FeedbackRing rng;]]></code.declaration>
       <code.init><![CDATA[rng.init(attr_chainSizeSeconds*1000);]]></code.init>
       <code.dispose><![CDATA[rng.dispose();]]></code.dispose>
-      <code.krate><![CDATA[int32_t oldFdbk=123;
+      <code.krate><![CDATA[static int32_t oldFdbk=123;
 
 if (oldFdbk!=inlet_fdbk)
 {
 	oldFdbk = inlet_fdbk;
 	rng.feedBack(oldFdbk);
-	//LogTextMessage("fdbk: %x", oldFdbk);
 }
 
 static int kCnt = 0;
@@ -364,53 +219,9 @@ if (kCnt++ > 500)
 	rng.setLevel(2,param_levelTap2);
 	
 	rng.setDamping(inlet_damping);
+	rng.hold = inlet_hold;
 }
 
-
-if (param_looperMode && !rng.isLooperMode())
-{
-	rng.looperMode(true);
-}
-
-if (!param_looperMode && rng.isLooperMode())
-{
-	rng.looperMode(false);
-}
-
-if (rng.isLooperMode())
-{
-	if (param_loopArmRecord)
-	{
-		if (!rng.isArmed() && !rng.isRecording())
-			rng.arm();
-	}
-	else {
-		if (rng.isArmed())
-		{
-			rng.disarm();
-		}
-	}
-	
-	
-	if (param_loopPlay)
-	{
-		if (!rng.isPlaying())
-		{
-			if (rng.isRecording())
-			{
-				rng.stopRecording();
-			}
-			rng.play();
-		}
-	}
-	else
-	{
-		if (rng.isPlaying())
-		{
-			rng.stopPlay();
-		}
-	}
-}
-rng.update(inlet_left, outlet_left);]]></code.krate>
+rng.update(inlet_in, outlet_out);]]></code.krate>
    </obj.normal>
 </objdefs>

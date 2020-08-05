@@ -1,0 +1,287 @@
+<objdefs appVersion="2.0.0">
+   <obj.normal id="monoLooper" uuid="24d5ee3e-19bb-42ef-add1-5de298531068">
+      <author>Jürgen Schwietering</author>
+      <license>MIT</license>
+      <inlets>
+         <frac32buffer name="left" description="in"/>
+         <frac32buffer name="right" description=""/>
+         <frac32.positive name="damping" description=""/>
+      </inlets>
+      <outlets>
+         <frac32buffer name="left" description="out"/>
+         <frac32buffer name="right" description=""/>
+      </outlets>
+      <displays/>
+      <params>
+         <bool32.tgl name="loopArmRecord" description=""/>
+         <bool32.tgl name="loopPlay" description=""/>
+         <frac32.u.map.gain name="levelDry" description="">
+            <DefaultValue v="0.0"/>
+         </frac32.u.map.gain>
+         <frac32.u.map.gain name="levelWet" description="">
+            <DefaultValue v="0.0"/>
+         </frac32.u.map.gain>
+      </params>
+      <attribs>
+         <spinner name="chainSizeSeconds" description="" MinValue="1" MaxValue="40" DefaultValue="40"/>
+      </attribs>
+      <file-depends/>
+      <includes/>
+      <depends/>
+      <modules/>
+      <code.declaration><![CDATA[class FeedbackRing
+{
+public:
+	FeedbackRing()
+	: m_size(0)
+	, m_head(0)
+	, prev(0)
+	, offset(0)
+	, levelRecordStart(0x1000000)
+	{
+	}
+
+	~FeedbackRing()
+	{
+		if (m_buffer)
+		{
+			dispose();
+		}
+	}
+
+	void dispose()
+	{
+		ax_free(m_buffer);
+		m_buffer = 0;
+	}
+
+	void init(int sizeMsecs)
+	{
+		int size = 48000*sizeMsecs/1000;
+		m_buffer = (int16_t *) sdram_malloc(size*sizeof(int32_t));
+		LogTextMessage("looper delay mem: %d", size);
+		m_maxSize = size;
+		m_size = size;
+		memset(m_buffer, 0, sizeof(int16_t)*m_size);
+		m_head = 0;
+		prev = 0;
+		offset = 0;
+	}
+
+	void setDamping(int32_t damping)
+	{
+		m_damper = damping;
+	}
+
+
+     int32_t damper(int32_t in)
+     {
+     	int32_t delta = prev-in;
+		offset = ___SMMLA(m_damper<<3, offset<<2, delta);
+		prev = in;
+		return offset+in;	
+     }
+	
+	int32_t update(const int32buffer left, const int32buffer right, int32buffer &outLeft, int32buffer &outRight)
+	{
+		if (playing)
+		{
+			int head = m_head;
+			for (int i=0; i < BUFSIZE; ++i)
+			{
+				int32_t looperValue = damper(m_buffer[m_head]<<14);
+				m_head++;
+				if (m_head >= m_recordingSize)
+				{
+					if (m_recordingSize>10000)
+						LogTextMessage("wrap");
+					m_head = 0;
+				}
+				int32_t looperWet = ___SMMUL(looperValue<<1, level);
+				int32_t retValue =  ___SMMUL(left[i]<<1, m_dryLevel);
+				retValue += looperWet;
+				outLeft[i] = __SSAT(retValue,28);
+				retValue =  ___SMMUL(right[i]<<1, m_dryLevel);
+				retValue += looperWet;
+				outRight[i] = __SSAT(retValue,28);
+			}
+		}
+		else if (armed)
+		{
+			for (int i=0; i < BUFSIZE; ++i)
+			{
+				if ((abs(left[i]) > levelRecordStart) || (abs(right[i]) > levelRecordStart))
+				{
+					recording = true;
+					armed = false;
+					m_head = 0;
+					m_recordingSize = 0;
+				}
+				outLeft[i] = left[i];
+				outRight[i] = right[i];
+			}
+			if (recording)
+				LogTextMessage("recording started");
+		}
+		else
+		{
+			for (int i=0; i < BUFSIZE; ++i)
+			{
+				outLeft[i] = left[i];
+				outRight[i] = right[i];
+			}
+		}
+		if (recording)
+		{
+			for (int i=0; i < BUFSIZE; ++i)
+			{
+				m_buffer[m_recordingSize] = __SSAT((left[i]+right[i]) >> 15,16);
+				m_recordingSize++;
+				if (m_recordingSize >= m_maxSize-BUFSIZE-1)
+				{
+					recording = false;
+					playing = false;
+					m_head = 0; // next chunk we will playout
+				}
+				outLeft[i] = left[i];
+				outRight[i] = right[i];
+			}
+		}
+			
+	}
+
+	
+	void setDryLevel(int32_t dryLevel)
+	{
+		m_dryLevel = dryLevel;
+	}
+
+	void setLevel(int32_t value)
+	{
+		level = value;
+	}
+
+	void arm()
+	{
+		armed = true;
+		recording = false;
+		playing = false;
+	}
+
+	void disarm()
+	{
+		armed = false;
+		recording = false;
+		playing = false;
+	}
+
+	bool isArmed()
+	{
+		return armed;
+	}
+	
+	bool isRecording()
+	{
+		return recording;
+	}
+
+	bool isPlaying()
+	{
+		return playing;
+	}
+
+	void stopRecording()
+	{
+		recording = false;
+		playing = true;
+		m_head = 0;
+		LogTextMessage("recording stopped @ %d", m_recordingSize);
+		
+	}
+
+	void play()
+	{
+		playing = true;
+		m_head = 0;
+	}
+
+	void stopPlay()
+	{
+		playing = false;
+	}
+
+	void resetLooper()
+	{
+		m_head = 0;
+		m_recordingSize = 0;
+		memset(m_buffer, 0, BUFSIZE*4);	
+	}
+	
+private:
+	int32_t m_size;
+	int32_t m_maxSize;
+	int32_t m_head;
+	int32_t m_feedback;
+	int16_t *m_buffer;
+     int32_t m_damper;
+	int32_t prev;
+	int32_t offset;
+	int32_t m_dryLevel;
+	int32_t level;
+	bool m_looperMode;
+	bool armed;
+	bool recording;
+	bool playing;
+	int32_t m_recordingSize;
+	int32_t levelRecordStart;
+
+	
+};
+
+FeedbackRing rng;]]></code.declaration>
+      <code.init><![CDATA[rng.init(attr_chainSizeSeconds*1000);]]></code.init>
+      <code.dispose><![CDATA[rng.dispose();]]></code.dispose>
+      <code.krate><![CDATA[static int kCnt = 0;
+if (kCnt++ > 500)
+{
+	kCnt = 0;
+	rng.setDryLevel(param_levelDry);
+	rng.setLevel(param_levelWet);
+	rng.setDamping(inlet_damping);
+}
+
+if (param_loopArmRecord)
+{
+	if (!rng.isArmed() && !rng.isRecording())
+		rng.arm();
+}
+else {
+	if (rng.isArmed())
+	{
+		rng.disarm();
+	}
+}
+
+
+if (param_loopPlay)
+{
+	if (!rng.isPlaying())
+	{
+		if (rng.isRecording())
+		{
+			rng.stopRecording();
+		}
+		rng.play();
+	}
+}
+else
+{
+	if (rng.isPlaying())
+	{
+		rng.stopPlay();
+	}
+}
+
+rng.update(inlet_left, inlet_right, outlet_left, outlet_right);]]></code.krate>
+   </obj.normal>
+</objdefs>
