@@ -453,7 +453,7 @@ public:
         {
         	   float f = params.separationFrequency[0];
         	   LogTextMessage("f=%d", (int)f);
-	        lowBandFilter.setLowpass(f*2,0.5);
+	        lowBandFilter.setLowpass(f,0.5);
 	        midBandFilter[0].setHighpass(f,0.5);
 	        paramsSet.separationFrequency[0] = params.separationFrequency[0];
         }
@@ -461,7 +461,7 @@ public:
         {
         	   float f = paramsSet.separationFrequency[1];
         	   LogTextMessage("MB HP f=%d", (int)f);
-        	   midBandFilter[1].setLowpass(f*2,0.5);
+        	   midBandFilter[1].setLowpass(f,0.5);
         	   upperBandFilter.setHighpass(f,0.5);
 	        paramsSet.separationFrequency[1] = params.separationFrequency[1];
         }
