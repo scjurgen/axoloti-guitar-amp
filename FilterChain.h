@@ -10,18 +10,20 @@ typedef float FloatBuffer[BUFSIZE];
 #define B -0.287434475393028
 #define C (M_PI_4 - A - B)
 #ifndef M_PI_4
-#define M_PI_4 (3.1415926535897932384626433832795/4.0)
+#define M_PI_4 (3.1415926535897932384626433832795 / 4.0)
 #endif
 
 #define ALLPASSMAX 300
 
 class AllPassFilter
 {
-public:
-    AllPassFilter() : head(0), gain(0.0), currentWidth(10)
+  public:
+    AllPassFilter()
+      : head(0)
+      , gain(0.0)
+      , currentWidth(10)
     {
-
-        buffer = (float *)sdram_malloc(ALLPASSMAX*sizeof(float));
+        buffer = (float *) sdram_malloc(ALLPASSMAX * sizeof(float));
         reset();
         feeding = false;
     }
@@ -52,7 +54,7 @@ public:
 
     float step(float in)
     {
-        float value = in + buffer[head];
+        float value    = in + buffer[head];
         buffer[head++] = value * gain;
         if (head >= currentWidth)
             head = 0;
@@ -61,62 +63,57 @@ public:
     void reset()
     {
         head = 0;
-        for (int i=0; i < ALLPASSMAX; ++i)
+        for (int i = 0; i < ALLPASSMAX; ++i)
             buffer[i] = 0;
     }
 
     void update(FloatBuffer &inPlace)
     {
-        for (int s=0; s < 16; ++s)
-        {
+        for (int s = 0; s < 16; ++s) {
             inPlace[s] = step(inPlace[s]);
         }
     }
 
     void update(const FloatBuffer &in, FloatBuffer &out)
     {
-        if (!feeding)
-        {
+        if (!feeding) {
             feeding = true;
         }
-        for (int s=0; s < 16; ++s)
-        {
+        for (int s = 0; s < 16; ++s) {
             out[s] = step(in[s]);
         }
     }
 
-    float *buffer;
+    float *  buffer;
     uint32_t head;
-    float gain;
-    int currentWidth;
-    bool feeding;
+    float    gain;
+    int      currentWidth;
+    bool     feeding;
 };
 
-template<int __MAXFILTERS__, int __MAXALLPASS__>
+template <int __MAXFILTERS__, int __MAXALLPASS__>
 class FilterChain
 {
-public:
+  public:
     FilterChain()
-            :m_filterItems(0)
+      : m_filterItems(0)
     {
-        for (int f=0; f < __MAXFILTERS__; f++)
-            for (int c=0; c < 2; c++)
-            {
-                filters[c][f] = (AudioFilterBiquad*)sdram_malloc(sizeof(AudioFilterBiquad));
+        for (int f = 0; f < __MAXFILTERS__; f++)
+            for (int c = 0; c < 2; c++) {
+                filters[c][f] = (AudioFilterBiquad *) sdram_malloc(sizeof(AudioFilterBiquad));
             }
     }
 
     FilterChain(FilterSet<__MAXFILTERS__> &initial)
-            : m_filterItems()
+      : m_filterItems()
     {
         setParams(initial);
     }
 
     void dispose()
     {
-        for (int f=0; f < __MAXFILTERS__; f++)
-            for (int c=0; c < 2; c++)
-            {
+        for (int f = 0; f < __MAXFILTERS__; f++)
+            for (int c = 0; c < 2; c++) {
                 ax_free(filters[c][f]);
             }
     }
@@ -127,11 +124,9 @@ public:
         int fIndex = 0, aIndex = 0;
         parallelCount = 0;
         straightCount = 0;
-        allPassCount = 0;
-        for (int i = 0; i < newValues.filterCount; ++i)
-        {
-            if (filterParam.fSet[i].equalizer != EQ_NONE)
-            {
+        allPassCount  = 0;
+        for (int i = 0; i < newValues.filterCount; ++i) {
+            if (filterParam.fSet[i].equalizer != EQ_NONE) {
                 parallelList[parallelCount++] = fIndex;
                 if (filterParam.fSet[i].equalizer == EQ_LOW)
                     eqIndex[0] = i;
@@ -139,21 +134,17 @@ public:
                     eqIndex[1] = i;
                 if (filterParam.fSet[i].equalizer == EQ_HIGH)
                     eqIndex[2] = i;
-            } else
-            {
-                if (filterParam.fSet[i].type==FilterType::AllPass)
-                {
+            } else {
+                if (filterParam.fSet[i].type == FilterType::AllPass) {
                     allPassList[allPassCount++] = aIndex;
-                }
-                else
-                {
+                } else {
                     straightList[straightCount++] = fIndex;
                 }
             }
-            switch (filterParam.fSet[i].type)
-            {
+            switch (filterParam.fSet[i].type) {
                 case FilterType::None:
-                    for (int stage = 0; stage < 2; ++stage) filters[stage][fIndex]->setLinearGain(1.0);
+                    for (int stage = 0; stage < 2; ++stage)
+                        filters[stage][fIndex]->setLinearGain(1.0);
                     break;
                 case FilterType::AllPass:
                     allPass[aIndex].setFrequency(filterParam.fSet[i].f);
@@ -173,19 +164,19 @@ public:
                 case FilterType::HiShelf:
                     for (int stage = 0; stage < 2; ++stage)
                         filters[stage][fIndex]->setHighShelf(filterParam.fSet[i].f, filterParam.fSet[i].gain,
-                                                            filterParam.fSet[i].q);
+                                                             filterParam.fSet[i].q);
                     fIndex++;
                     break;
                 case FilterType::LoShelf:
                     for (int stage = 0; stage < 2; ++stage)
                         filters[stage][fIndex]->setLowShelf(filterParam.fSet[i].f, filterParam.fSet[i].gain,
-                                                           filterParam.fSet[i].q);
+                                                            filterParam.fSet[i].q);
                     fIndex++;
                     break;
                 case FilterType::Peak:
                     for (int stage = 0; stage < 2; ++stage)
                         filters[stage][fIndex]->setPeakEQ(filterParam.fSet[i].f, filterParam.fSet[i].gain,
-                                                         filterParam.fSet[i].q);
+                                                          filterParam.fSet[i].q);
                     fIndex++;
                     break;
                 case FilterType::Notch:
@@ -201,8 +192,7 @@ public:
 
     void reset()
     {
-        for (int stage = 0; stage < 2; ++stage)
-        {
+        for (int stage = 0; stage < 2; ++stage) {
             for (int i = 0; i < __MAXFILTERS__; ++i)
                 filters[stage][i]->reset();
         }
@@ -213,53 +203,47 @@ public:
     void update(FloatBuffer &inplace, int idx)
     {
         filters[0][idx]->update(inplace, BUFSIZE);
-        if (filterParam.fSet[idx].order)
-        {
+        if (filterParam.fSet[idx].order) {
             filters[1][idx]->update(inplace, BUFSIZE);
         }
     }
     void update(const FloatBuffer &in, FloatBuffer &out, int idx)
     {
         filters[0][idx]->update(in, out, BUFSIZE);
-        if (filterParam.fSet[idx].order)
-        {
+        if (filterParam.fSet[idx].order) {
             filters[1][idx]->update(out, BUFSIZE);
         }
     }
 
     void clearBuffer(FloatBuffer &buffer)
     {
-        for (int s=0; s < BUFSIZE; ++s)
-           buffer[s] = 0.0;
+        for (int s = 0; s < BUFSIZE; ++s)
+            buffer[s] = 0.0;
     }
 
     void addBuffer(const FloatBuffer &source, FloatBuffer &target)
     {
-        for (int s=0; s < BUFSIZE; ++s)
-        {
-            target[s]+=source[s];
+        for (int s = 0; s < BUFSIZE; ++s) {
+            target[s] += source[s];
         }
     }
 
-    void scaleBuffer(const FloatBuffer &buffer,  FloatBuffer &target, float gain)
+    void scaleBuffer(const FloatBuffer &buffer, FloatBuffer &target, float gain)
     {
-        for (int s=0; s < BUFSIZE; ++s)
-        {
+        for (int s = 0; s < BUFSIZE; ++s) {
             target[s] = buffer[s] * gain;
         }
     }
 
     void setEQ(float low, float mid, float high)
     {
-        float gains[3] = {low,mid, high};
-        for (int c=0; c < 3; ++c)
-        {
-            if (lastGains[c] != gains[c])
-            {
+        float gains[3] = {low, mid, high};
+        for (int c = 0; c < 3; ++c) {
+            if (lastGains[c] != gains[c]) {
                 for (int stage = 0; stage < 2; ++stage)
                     filters[stage][eqIndex[c]]->setPeakEQ(filterParam.fSet[eqIndex[c]].f,
-                                                         filterParam.fSet[eqIndex[c]].gain + gains[c] * 18,
-                                                         filterParam.fSet[eqIndex[c]].q);
+                                                          filterParam.fSet[eqIndex[c]].gain + gains[c] * 18,
+                                                          filterParam.fSet[eqIndex[c]].q);
                 lastGains[c] = gains[c];
             }
         }
@@ -268,34 +252,29 @@ public:
     void update(FloatBuffer &inplace)
     {
         FloatBuffer result;
-        if (allPassCount)
-        {
+        if (allPassCount) {
             FloatBuffer sum;
             FloatBuffer tmp;
             clearBuffer(sum);
-            for (int i = 0; i < allPassCount; ++i)
-            {
+            for (int i = 0; i < allPassCount; ++i) {
                 allPass[allPassList[i]].update(inplace, tmp);
                 addBuffer(tmp, sum);
             }
-            scaleBuffer(sum,result, 1.0f/allPassCount);
-        } else{
+            scaleBuffer(sum, result, 1.0f / allPassCount);
+        } else {
             memcpy(result, inplace, sizeof(FloatBuffer));
         }
-        if (parallelCount)
-        {
+        if (parallelCount) {
             FloatBuffer sum;
             FloatBuffer tmp;
             memcpy(sum, result, sizeof(FloatBuffer));
-            for (int i = 0; i < parallelCount; ++i)
-            {
+            for (int i = 0; i < parallelCount; ++i) {
                 filters[0][parallelList[i]]->update(inplace, tmp, BUFSIZE);
                 addBuffer(tmp, sum);
             }
-            scaleBuffer(sum,result, 1.0f/parallelCount);
+            scaleBuffer(sum, result, 1.0f / parallelCount);
         }
-        for (int i = 0; i < straightCount; ++i)
-        {
+        for (int i = 0; i < straightCount; ++i) {
             filters[0][straightList[i]]->update(result, BUFSIZE);
         }
         scaleBuffer(result, inplace, filterParam.masterGain);
@@ -304,27 +283,25 @@ public:
     void dsp(const int32buffer in, int32buffer &out)
     {
         float buffer[BUFSIZE];
-        for (int i = 0; i < BUFSIZE; ++i)
-        {
+        for (int i = 0; i < BUFSIZE; ++i) {
             buffer[i] = q27_to_float(in[i]);
         }
         update(buffer);
-        for (int i = 0; i < BUFSIZE; ++i)
-        {
+        for (int i = 0; i < BUFSIZE; ++i) {
             out[i] = float_to_q27(buffer[i]);
         }
     }
 
-    int m_filterItems;
-    AllPassFilter allPass[__MAXALLPASS__];
-    AudioFilterBiquad *filters[2][__MAXFILTERS__];
+    int                       m_filterItems;
+    AllPassFilter             allPass[__MAXALLPASS__];
+    AudioFilterBiquad *       filters[2][__MAXFILTERS__];
     FilterSet<__MAXFILTERS__> filterParam;
-    int allPassList[__MAXFILTERS__];
-    int allPassCount;
-    int parallelList[__MAXFILTERS__];
-    int parallelCount;
-    int straightList[__MAXFILTERS__];
-    int straightCount;
-    int eqIndex[3];
-    float lastGains[3];
+    int                       allPassList[__MAXFILTERS__];
+    int                       allPassCount;
+    int                       parallelList[__MAXFILTERS__];
+    int                       parallelCount;
+    int                       straightList[__MAXFILTERS__];
+    int                       straightCount;
+    int                       eqIndex[3];
+    float                     lastGains[3];
 };
